@@ -1,0 +1,19 @@
+{
+  "topics": [
+    {
+      "id": "sample_topic",
+      "name": "Sample Topic",
+      "lesson_ids": [1, 2]
+    },
+    {
+      "id": "theMITmonk",
+      "name": "The MIT Monk",
+      "lesson_ids": [3]
+    }
+  ],
+  "lessons": {
+    "1": {"filename": "sample_lesson_1.md", "name": "Sample Lesson 1"},
+    "2": {"filename": "sample_lesson_2.md", "name": "Sample Lesson 2"},
+    "3": {"filename": "260203_1.md", "name": "The 3C Learning Protocol"}
+  }
+}

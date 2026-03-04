@@ -1,0 +1,49 @@
+# Virtual environment
+venv/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env_backup
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+
+# Data and large files
+data/
+*.pdf
+
+# Large files and notebooks
+*.ipynb
+scripts/test_openai_food.ipynb
+
+# Generated/temporary files
+concatenated.jpg
+concatenated.*
+*.log
+app.log
+*.bak
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+._*
+
+# Frontend
+frontend/node_modules/
+frontend/.cache/
+frontend/build/
+frontend/dist/
+
+.cursor/

@@ -1,0 +1,13 @@
+"""Central API router aggregating all API endpoints."""
+
+from fastapi import APIRouter
+
+from src.api import auth, login, recall_dashboard, root, quiz
+
+api_router = APIRouter()
+
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(login.router, tags=["login"])
+api_router.include_router(root.router, prefix="/api", tags=["root"])
+api_router.include_router(quiz.router, tags=["quiz"])
+api_router.include_router(recall_dashboard.router, tags=["dashboard"])
