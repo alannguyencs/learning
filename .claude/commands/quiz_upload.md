@@ -22,7 +22,7 @@ If the file does not exist, stop and inform the user.
 
 ### Step 2: Resolve Metadata
 
-Read `backend/resources/topics.json` to resolve `topic_id`, `lesson_id`, and `lesson_filename` for this file by matching the filename.
+Read `backend/resources/topics.json` to resolve `topic_id`, `topic_name`, `lesson_id`, `lesson_name`, and `lesson_filename` for this file by matching the filename.
 
 If the filename is not found in `topics.json`, ask the user whether to:
 1. Add it under an existing topic (show the list of existing topics)
