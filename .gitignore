@@ -23,6 +23,7 @@ scripts/test_openai_food.ipynb
 
 # Generated/temporary files
 concatenated.jpg
+dump_local_to_cloud.sql
 concatenated.*
 *.log
 app.log
