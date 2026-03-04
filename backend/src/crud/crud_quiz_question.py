@@ -44,3 +44,11 @@ def get_question_count_for_topic(db: Session, topic_id: str) -> int:
 def get_total_question_count(db: Session) -> int:
     """Count all questions in the bank."""
     return db.query(QuizQuestion).count()
+
+
+def create_quiz_questions(db: Session, questions: list[dict]) -> int:
+    """Bulk insert quiz questions and return the count inserted."""
+    objects = [QuizQuestion(**q) for q in questions]
+    db.add_all(objects)
+    db.commit()
+    return len(objects)

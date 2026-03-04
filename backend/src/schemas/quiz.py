@@ -75,3 +75,32 @@ class TopicWithLessons(BaseModel):
     topic_id: str
     topic_name: str
     lessons: List[LessonItem]
+
+
+class QuizQuestionCreate(BaseModel):
+    """Request body for creating a single quiz question."""
+
+    topic_id: str
+    lesson_id: int
+    lesson_filename: str
+    quiz_type: str
+    question: str
+    quiz_learnt: str
+    option_a: str
+    option_b: str
+    option_c: str
+    option_d: str
+    correct_options: List[str]
+    response_to_user_option_a: str
+    response_to_user_option_b: str
+    response_to_user_option_c: str
+    response_to_user_option_d: str
+    quiz_take_away: str
+
+
+class QuizBulkCreateResponse(BaseModel):
+    """Response for POST /api/quiz/questions."""
+
+    inserted: int
+    lesson_id: int
+    topic_id: str

@@ -1,7 +1,7 @@
 """API routes for quiz system."""
 
 import logging
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -13,15 +13,21 @@ from src.crud.crud_quiz_log import (
     get_quiz_log_by_id,
     get_quiz_stats,
 )
-from src.crud.crud_quiz_question import get_question_by_id, get_total_question_count
+from src.crud.crud_quiz_question import (
+    create_quiz_questions,
+    get_question_by_id,
+    get_total_question_count,
+)
 from src.database import get_db
 from src.schemas.quiz import (
     LessonItem,
     QuizAnswerRequest,
     QuizAnswerResponse,
+    QuizBulkCreateResponse,
     QuizEligibilityResponse,
     QuizHistoryItem,
     QuizNextResponse,
+    QuizQuestionCreate,
     QuizStatsResponse,
     TopicWithLessons,
 )
@@ -186,3 +192,27 @@ async def get_topics(request: Request, db: Session = Depends(get_db)):
         )
 
     return {"topics": topics}
+
+
+@router.post("/questions", response_model=QuizBulkCreateResponse)
+async def create_questions(
+    request: Request,
+    questions: List[QuizQuestionCreate],
+    db: Session = Depends(get_db),
+):
+    """Bulk-create quiz questions."""
+    _get_user_or_401(request, db)
+
+    if not questions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No questions provided"
+        )
+
+    dicts = [q.model_dump() for q in questions]
+    count = create_quiz_questions(db, dicts)
+
+    return QuizBulkCreateResponse(
+        inserted=count,
+        lesson_id=questions[0].lesson_id,
+        topic_id=questions[0].topic_id,
+    )

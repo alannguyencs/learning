@@ -75,8 +75,12 @@ def get_current_user_from_token(db: Session, token: str) -> Optional[Users]:
 
 
 def authenticate_user_from_request(request: Request, db: Session) -> Union[Users, bool]:
-    """Authenticate user from HTTP request using session cookie."""
+    """Authenticate user from HTTP request using cookie or Bearer token."""
     token = request.cookies.get("access_token")
+    if not token:
+        auth_header = request.headers.get("authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header[7:]
     if not token:
         return False
 
