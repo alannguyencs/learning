@@ -9,11 +9,17 @@
       "id": "theMITmonk",
       "name": "The MIT Monk",
       "lesson_ids": [3]
+    },
+    {
+      "id": "coach",
+      "name": "Coach",
+      "lesson_ids": [4]
     }
   ],
   "lessons": {
     "1": {"filename": "sample_lesson_1.md", "name": "Sample Lesson 1"},
     "2": {"filename": "sample_lesson_2.md", "name": "Sample Lesson 2"},
-    "3": {"filename": "260203_1.md", "name": "The 3C Learning Protocol"}
+    "3": {"filename": "260203_1.md", "name": "The 3C Learning Protocol"},
+    "4": {"filename": "260204_1.md", "name": "Bloom: LLM-Augmented Behavior Change"}
   }
 }

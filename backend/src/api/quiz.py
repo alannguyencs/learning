@@ -38,6 +38,7 @@ from src.service.topic_lookup import (
     get_lesson_name,
     get_lessons_for_topic,
     get_topic_name,
+    register_topic,
 )
 
 logger = logging.getLogger(__name__)
@@ -210,6 +211,20 @@ async def create_questions(
 
     dicts = [q.model_dump() for q in questions]
     count = create_quiz_questions(db, dicts)
+
+    # Auto-register topics/lessons in memory cache
+    seen = set()
+    for q in questions:
+        key = (q.topic_id, q.lesson_id)
+        if key not in seen:
+            seen.add(key)
+            register_topic(
+                topic_id=q.topic_id,
+                topic_name=q.topic_name,
+                lesson_id=q.lesson_id,
+                lesson_name=q.lesson_name,
+                lesson_filename=q.lesson_filename,
+            )
 
     return QuizBulkCreateResponse(
         inserted=count,

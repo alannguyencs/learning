@@ -13,7 +13,9 @@ Users learn lessons across many topics but naturally forget material over time. 
 
 ## Solution
 
-All quiz questions are prepared in advance by a local AI agent and stored in a question bank. When a user requests a quiz, the app uses a spaced-repetition algorithm called MEMORIZE to pick the right question. The algorithm tracks recall at two levels — **topic level** and **lesson level** — and selects the topic the user is most likely to have forgotten, then the weakest lesson within it. Users can also choose to focus on a specific topic or lesson. After the user answers, the system updates their memory profile at both levels — correct answers slow future forgetting; wrong answers accelerate it.
+All quiz questions are prepared in advance by a local AI agent and stored in a question bank. The agent generates questions from lesson content and uploads them to the app through its API, using a stored authentication token. This means questions can be uploaded to both local and remote servers without direct database access. Topics are automatically registered when quiz questions are uploaded — no server redeployment is needed to add new topics or lessons.
+
+When a user requests a quiz, the app uses a spaced-repetition algorithm called MEMORIZE to pick the right question. The algorithm tracks recall at two levels — **topic level** and **lesson level** — and selects the topic the user is most likely to have forgotten, then the weakest lesson within it. Users can also choose to focus on a specific topic or lesson. After the user answers, the system updates their memory profile at both levels — correct answers slow future forgetting; wrong answers accelerate it.
 
 ## User Flow
 
@@ -107,7 +109,7 @@ Questions test deep understanding, not surface-level memorization. The system av
   - Memory profile updates at both topic and lesson level on each answer
 
 - **Not included:**
-  - On-the-fly question generation — all questions are pre-generated offline
+  - On-the-fly question generation — all questions are pre-generated offline and uploaded via the API
   - Free-text or open-ended questions
   - Chat-based interaction — quizzes are standalone request/response
   - Timed quizzes or time pressure mechanics

@@ -121,6 +121,35 @@ CRUD: UPDATE QuizLog + UserTopicMemory + UserLessonMemory
 Return result + quiz_learnt + explanations (all 4 options) + quiz_take_away to frontend
 ```
 
+## Quiz Upload Pipeline — [details](./quiz.md)
+
+```
+Local agent generates quiz questions from lesson file (LLM call)
+  │
+  ▼
+Agent reads .env for WEBAPP_ACCESS_TOKEN and WEBAPP_API_URL
+  │
+  ▼
+Agent writes questions to temp JSON file
+  │
+  ▼
+POST /api/quiz/questions  (Authorization: Bearer <token>)
+  │
+  ▼
+authenticate_user_from_request()
+  ├── Cookie not present → check Authorization header
+  └── Decode Bearer token as JWT → look up user
+  │
+  ▼
+Validate List[QuizQuestionCreate] request body
+  │
+  ▼
+CRUD: db.add_all(QuizQuestion objects) → bulk INSERT
+  │
+  ▼
+Return { inserted, lesson_id, topic_id }
+```
+
 ## Recall Dashboard Pipeline — [details](./recall_dashboard.md)
 
 ```

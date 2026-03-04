@@ -1,9 +1,12 @@
-"""Topic-lesson resolution utility — loads from resources/topics.json."""
+"""Topic-lesson resolution utility — seeds from topics.json, syncs from DB."""
 
 import json
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional
+
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -91,3 +94,50 @@ def get_lesson_filename(lesson_id: int) -> str:
 def get_lesson_count(topic_id: str) -> int:
     """Return number of lessons in a topic."""
     return len(_topic_to_lessons.get(topic_id, []))
+
+
+def register_topic(
+    topic_id: str,
+    topic_name: str,
+    lesson_id: int,
+    lesson_name: str,
+    lesson_filename: str,
+) -> None:
+    """Register a topic/lesson in the in-memory cache if not already present."""
+    if topic_id not in _topic_to_lessons:
+        _topic_to_lessons[topic_id] = []
+        logger.info(f"Registered new topic: {topic_id} ({topic_name})")
+    if topic_id not in _topic_names:
+        _topic_names[topic_id] = topic_name
+
+    if lesson_id not in _lesson_to_topic:
+        _lesson_to_topic[lesson_id] = topic_id
+    if lesson_id not in _lesson_names:
+        _lesson_names[lesson_id] = lesson_name
+    if lesson_id not in _lesson_filenames and lesson_filename:
+        _lesson_filenames[lesson_id] = lesson_filename
+    if lesson_id not in _topic_to_lessons[topic_id]:
+        _topic_to_lessons[topic_id].append(lesson_id)
+
+
+def sync_from_db(db: Session) -> None:
+    """Sync in-memory topic cache from quiz_questions table."""
+    try:
+        rows = db.execute(
+            text(
+                "SELECT DISTINCT topic_id, topic_name, lesson_id, lesson_name, lesson_filename "
+                "FROM quiz_questions"
+            )
+        ).fetchall()
+        for row in rows:
+            topic_id, topic_name, lesson_id, lesson_name, lesson_filename = row
+            register_topic(
+                topic_id=topic_id,
+                topic_name=topic_name or topic_id,
+                lesson_id=lesson_id,
+                lesson_name=lesson_name or f"Lesson {lesson_id}",
+                lesson_filename=lesson_filename or "",
+            )
+        logger.info(f"Synced {len(rows)} topic/lesson rows from DB")
+    except Exception as e:
+        logger.error(f"Failed to sync topics from DB: {e}")

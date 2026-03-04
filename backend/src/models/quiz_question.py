@@ -16,6 +16,8 @@ class QuizQuestion(Base):
     topic_id = Column(String, nullable=False)
     lesson_id = Column(Integer, nullable=False)
     lesson_filename = Column(String, nullable=False)
+    topic_name = Column(String, nullable=True)
+    lesson_name = Column(String, nullable=True)
     quiz_type = Column(String, nullable=False)
     question = Column(Text, nullable=False)
     quiz_learnt = Column(Text, nullable=False)

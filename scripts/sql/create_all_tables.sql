@@ -18,6 +18,8 @@ CREATE TABLE quiz_questions (
     topic_id VARCHAR NOT NULL,
     lesson_id INTEGER NOT NULL,
     lesson_filename VARCHAR NOT NULL,
+    topic_name VARCHAR,
+    lesson_name VARCHAR,
     quiz_type VARCHAR NOT NULL,
     question TEXT NOT NULL,
     quiz_learnt TEXT NOT NULL,

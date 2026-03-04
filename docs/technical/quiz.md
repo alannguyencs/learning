@@ -16,11 +16,12 @@
                                                    (pre-generated
                                                     question bank)
 
-Offline (not part of the web app):
-+-------------+       +------------+
-| Local Agent | ----> | PostgreSQL |
-| (LLM call)  |       | INSERT     |
-+-------------+       +------------+
+Offline (quiz upload via API):
++-------------+       +---------------------+       +------------+
+| Local Agent | ----> |  Backend (FastAPI)   | ----> | PostgreSQL |
+| (LLM call)  |  POST |  POST /api/quiz/    |       | INSERT     |
++-------------+  Bearer  questions           |       +------------+
+                  token +---------------------+
 ```
 
 **Layers involved:**
@@ -31,9 +32,11 @@ Offline (not part of the web app):
 - **Backend — CRUD** — Reads `QuizQuestion` (question bank), reads/writes `QuizLog`, `UserTopicMemory`, and `UserLessonMemory`.
 - **Database** — Stores the pre-generated question bank, quiz logs, and two-level memory state.
 
-Quiz questions are **not generated at runtime**. A local AI agent generates questions offline and inserts them into the `QuizQuestion` table. The web app only selects and serves them.
+Quiz questions are **not generated at runtime**. A local AI agent generates questions offline and uploads them via `POST /api/quiz/questions` using a Bearer token for authentication. The web app only selects and serves them.
 
 Topics and lessons are user-defined. The user provides lesson content (markdown files) organized by topic. The local agent reads each lesson and generates quiz questions for it.
+
+Topics are derived at runtime from the `quiz_questions` table. When new questions are uploaded with a previously unseen `topic_id`, the server registers the topic automatically. `topics.json` serves as the initial seed and as the local metadata source for the upload command.
 
 ## Data Model
 
@@ -47,6 +50,8 @@ Pre-generated question bank. Populated offline by a local agent. Always exactly 
 | `topic_id` | String | Topic this question belongs to |
 | `lesson_id` | Integer | Lesson identifier |
 | `lesson_filename` | String | Filename of the lesson source (e.g. `"sleep_hygiene.md"`) |
+| `topic_name` | String, nullable | Human-readable topic name (e.g. "Coach") |
+| `lesson_name` | String, nullable | Human-readable lesson name (e.g. "Bloom: LLM-Augmented Behavior Change") |
 | `quiz_type` | String | `recall`, `understanding`, `application`, or `analysis` |
 | `question` | Text | The question text |
 | `quiz_learnt` | Text | What the user is learning from this quiz — shown after the user answers |
@@ -262,6 +267,7 @@ Applied at **both** topic and lesson level after each answer:
 | GET | `/api/quiz/stats` | Session | — | `{ total, correct, accuracy }` | 200 |
 | GET | `/api/quiz/eligibility` | Session | — | `{ eligible, reason }` | 200 |
 | GET | `/api/quiz/topics` | Session | — | `{ topics[] }` with lesson lists | 200 |
+| POST | `/api/quiz/questions` | Bearer | `List[QuizQuestionCreate]` | `{ inserted, lesson_id, topic_id }` | 200 |
 
 ## Backend — Service Layer
 
@@ -271,11 +277,13 @@ Applied at **both** topic and lesson level after each answer:
 
 **MemoryService** — Updates **both** `UserTopicMemory` and `UserLessonMemory` after each answer. Applies the MEMORIZE forgetting-rate adjustment (alpha/beta) at both levels, increments counters, and sets the last review checkpoint.
 
+**TopicLookup** — Maintains the in-memory topic/lesson cache. Seeds from `topics.json` on module import. `sync_from_db()` is called on server startup to register any topics in the DB not present in `topics.json`. `register_topic()` is called after each quiz upload to immediately register new topics without restart.
+
 ## Offline Quiz Generation — LLM Prompt & Output Schema
 
-Quiz questions are generated offline by a local AI agent and inserted into the `QuizQuestion` table. This section documents the prompt and output schema used by the agent.
+Quiz questions are generated offline by a local AI agent and uploaded to the `QuizQuestion` table via `POST /api/quiz/questions`. The agent uses a Bearer token (stored in `.env` as `WEBAPP_ACCESS_TOKEN`) for authentication. This section documents the prompt and output schema used by the agent.
 
-Reference prompt: `markdown_notes/.claude/commands/test-knowledge.md`
+Reference command: `.claude/commands/quiz_upload.md`
 
 ### Question Formats
 
@@ -374,13 +382,27 @@ Each question targets one of four cognitive levels, varied across generation:
 | `response_to_user_option_D` | string | Explanation if user selects D — why correct/wrong with reasoning |
 | `quiz_take_away` | string | Key takeaway — shown after answering, alongside the explanations |
 
-The local agent calls the LLM with this prompt for each (lesson, quiz_type) combination and inserts the output into `QuizQuestion`.
+The local agent calls the LLM with this prompt for each (lesson, quiz_type) combination, then uploads the batch via `POST /api/quiz/questions` with a Bearer token.
+
+### Upload Payload — `QuizQuestionCreate`
+
+The upload payload sent to `POST /api/quiz/questions` includes all `QuizQuestionOutput` fields plus metadata resolved from `topics.json`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `topic_id` | string | Topic identifier (from `topics.json`) |
+| `lesson_id` | integer | Lesson identifier (from `topics.json`) |
+| `lesson_filename` | string | Filename of the lesson source |
+| `topic_name` | string | Human-readable topic name (e.g. "Coach") |
+| `lesson_name` | string | Human-readable lesson name (e.g. "Bloom: LLM-Augmented Behavior Change") |
+| *(all QuizQuestionOutput fields)* | | |
 
 ## Backend — CRUD Layer
 
 **crud_quiz_question:**
 - `get_question(db, lesson_id, quiz_type, exclude_ids)` — SELECT a `QuizQuestion` matching the criteria, excluding already-seen IDs. Returns one question or `None`.
 - `get_question_count(db, lesson_id)` — COUNT questions available for a lesson (used by eligibility check).
+- `create_quiz_questions(db, questions)` — Bulk INSERT a list of question dicts using `db.add_all()`. Returns the count inserted.
 
 **crud_quiz_log:**
 - `create_quiz_log(db, username, quiz_question_id, topic_id, lesson_id, quiz_type)` — INSERT a new pending quiz log record.
@@ -441,10 +463,11 @@ The local agent calls the LLM with this prompt for each (lesson, quiz_type) comb
 - [ ] GET `/api/quiz/stats` — total, correct, accuracy
 - [ ] GET `/api/quiz/eligibility` — checks if questions exist
 - [ ] GET `/api/quiz/topics` — returns topic list with nested lessons for filter
+- [ ] POST `/api/quiz/questions` — bulk-create quiz questions via Bearer token auth
 - [ ] QuizSelector service — two-level MEMORIZE (topic + lesson selection) + scope resolution + type rotation + question picking
 - [ ] AnswerService — answer grading logic
 - [ ] MemoryService — forgetting rate update at both topic and lesson level
-- [ ] CRUD quiz_question — get question, count questions
+- [ ] CRUD quiz_question — get question, count questions, bulk create
 - [ ] CRUD quiz_log — create, record answer, seen IDs, history, count
 - [ ] CRUD topic_memory — get/create, update on result, get all states
 - [ ] CRUD lesson_memory — get/create, update on result, get by topic, get all

@@ -21,7 +21,11 @@ Two authentication mechanisms:
 - **OAuth2 Bearer** (`POST /auth/token`) — returns a JWT in the response body. Used for tooling and API clients.
 - **Session Cookie** (`POST /api/login/`) — sets an `HttpOnly` cookie. Used by the frontend for all requests.
 
-All protected endpoints use `authenticate_user_from_request()`, which reads the `access_token` cookie, decodes the JWT, and looks up the user.
+All protected endpoints use `authenticate_user_from_request()`, which checks for authentication in two ways (in order):
+1. Reads the `access_token` cookie (used by the frontend)
+2. Falls back to the `Authorization: Bearer <token>` header (used by CLI tools and `curl`)
+
+The first token found is decoded as a JWT and looked up against the database.
 
 ## Data Model
 
@@ -107,7 +111,7 @@ Clear frontend auth state
   - `authenticate_user(username, password)` — bcrypt verify, returns `Users` or `False`
   - `create_access_token(data, expires_delta=90d)` — HS256 JWT with `username` and `expire` claims
   - `get_current_user_from_token(token)` — decode JWT, fetch user from DB
-  - `authenticate_user_from_request(request)` — read `access_token` cookie, delegate to above
+  - `authenticate_user_from_request(request)` — check `access_token` cookie first, then fall back to `Authorization: Bearer` header; delegate to above
 - **JWT config:** HS256, secret from `JWT_SECRET_KEY` env var, 90-day expiry, payload stores `username` and `expire` (ISO 8601).
 - **Cookie config:** `HttpOnly=True`, `SameSite=Lax`, `Secure=False` (localhost), `Max-Age=7776000` (90 days), `Path=/`.
 

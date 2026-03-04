@@ -83,6 +83,8 @@ class QuizQuestionCreate(BaseModel):
     topic_id: str
     lesson_id: int
     lesson_filename: str
+    topic_name: str
+    lesson_name: str
     quiz_type: str
     question: str
     quiz_learnt: str
