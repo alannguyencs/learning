@@ -6,6 +6,7 @@ Case 3 (neither):    question-level recall across all topics
 """
 
 import logging
+import random
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -60,8 +61,8 @@ def select_question_by_recall(
     existing = {r.quiz_question_id: r for r in get_question_memories_for_ids(db, username, qids)}
     current_quiz_count = get_user_total_quiz_count(db, username)
 
-    best = None
-    lowest = float("inf")
+    # Collect all candidates with their recall scores
+    candidates = []
     for q in questions:
         if q.id in exclude_set:
             continue
@@ -70,10 +71,15 @@ def select_question_by_recall(
             recall = mem.recall_probability(current_quiz_count)
         else:
             recall = RECALL_NEVER_REVIEWED
-        if recall < lowest:
-            lowest = recall
-            best = q
-    return best
+        candidates.append((recall, q))
+
+    if not candidates:
+        return None
+
+    # Find lowest recall, then pick randomly among tied candidates
+    lowest = min(r for r, _ in candidates)
+    tied = [q for r, q in candidates if r == lowest]
+    return random.choice(tied)
 
 
 def select_quiz(
