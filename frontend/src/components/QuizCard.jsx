@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
 
@@ -12,7 +11,6 @@ const QuizCard = ({
   totalQuestions = null,
   loopResults = [],
 }) => {
-  const navigate = useNavigate();
   const [selected, setSelected] = useState([]);
   const isMulti = quiz.correct_option_count > 1;
   const answered = !!result;
@@ -75,14 +73,6 @@ const QuizCard = ({
               return <div key={i} className={`w-3 h-3 rounded-sm ${color}`} />;
             })}
           </div>
-        )}
-        {quiz.lesson_id && (
-          <button
-            onClick={() => navigate(`/lessons/${quiz.lesson_id}`)}
-            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            View Lesson
-          </button>
         )}
       </div>
       <p className="text-lg text-white mb-6">{quiz.question}</p>

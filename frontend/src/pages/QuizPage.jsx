@@ -102,7 +102,15 @@ const QuizPage = () => {
 
         {quiz?.lesson_title && (
           <p className="mb-4 text-sm text-gray-400 truncate">
-            <span className="text-blue-400">Lesson:</span> {quiz.lesson_title}
+            <span className="text-gray-500">Lesson:</span>{" "}
+            <a
+              href={`/lessons/${quiz.lesson_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            >
+              {quiz.lesson_title}
+            </a>
           </p>
         )}
 
