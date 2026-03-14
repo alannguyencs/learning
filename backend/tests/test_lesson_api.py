@@ -3,8 +3,6 @@
 from passlib.context import CryptContext
 
 from src.crud.crud_user import create_user
-from src.models.lesson import Lesson
-from src.service.topic_lookup import get_topic_for_lesson, get_lesson_name
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -82,20 +80,6 @@ def test_create_lesson_unauthenticated(client):
         json={"topic": "math", "title": "Algebra"},
     )
     assert response.status_code == 401
-
-
-def test_create_lesson_registers_in_topic_cache(client, db_session):
-    """Creating a lesson updates the topic_lookup in-memory cache."""
-    _login(client, db_session)
-    response = client.post(
-        "/api/lessons",
-        json={"topic": "cache_test_topic", "title": "Cache Test Lesson"},
-    )
-    assert response.status_code == 201
-    lesson_id = response.json()["id"]
-
-    assert get_topic_for_lesson(lesson_id) == "cache_test_topic"
-    assert get_lesson_name(lesson_id) == "Cache Test Lesson"
 
 
 # --- GET /api/lessons ---

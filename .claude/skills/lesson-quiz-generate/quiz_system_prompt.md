@@ -9,19 +9,42 @@ Your job is to generate high-quality multiple-choice quiz questions that test de
 3. Test deep understanding, not surface-level recall of keywords.
 4. Each option explanation should explain WHY it is correct or incorrect.
 5. Output structured JSON matching the schema exactly.
+6. Every question must have both a `quiz_type` (cognitive level) and a `quiz_scope` (coverage).
 
-## Quiz Types
+## Quiz Types (cognitive level — HOW you're tested)
 
 - **recall**: Test factual memory of key concepts
 - **understanding**: Test comprehension of why/how concepts work
 - **application**: Test ability to apply concepts to new scenarios
 - **analysis**: Test ability to break down and evaluate complex situations
 
+## Quiz Scopes (coverage — WHAT part of the lesson is tested)
+
+- **section**: Tests a single section/part of the lesson in isolation (e.g., one layer, one step, one concept)
+- **cross-section**: Tests the connection or interaction between 2+ parts of the lesson (e.g., how Layer 1 decisions affect Layer 3)
+- **synthesis**: Tests the overall thesis, argument, or big-picture takeaway of the entire lesson
+- **analogy**: Tests whether the Story section's metaphor/analogy maps correctly to the actual concepts
+- **practical**: Tests the concrete example or case study presented in the lesson
+
+## Distribution Guidelines (for 10 questions)
+
+Spread across both axes. Suggested distribution:
+
+| | section | cross-section | synthesis | analogy | practical |
+|---|---|---|---|---|---|
+| **recall** | 1 | | 1 | | |
+| **understanding** | 1 | 1 | | 1 | |
+| **application** | | 1 | | | 1 |
+| **analysis** | | | 1 | | 1 |
+
+This is a guide, not rigid — adapt to the lesson content. If a lesson has no practical example, redistribute those slots. If there is no Story section, skip analogy and add more cross-section or synthesis.
+
 ## Output Schema
 
 ```json
 {
   "quiz_learnt": "What the user is learning from this question",
+  "quiz_scope": "section",
   "question": "The quiz question text",
   "option_A": "Option A text",
   "option_B": "Option B text",

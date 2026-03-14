@@ -10,10 +10,9 @@ def test_users_table_name():
 
 
 def test_users_to_dict(db_session):
-    """to_dict() serialization includes id, username, role."""
-    user = create_user(db_session, "testuser", "hashedpass", "admin")
+    """to_dict() serialization includes id, username."""
+    user = create_user(db_session, "testuser", "hashedpass")
     user_dict = user.to_dict()
     assert user_dict["username"] == "testuser"
-    assert user_dict["role"] == "admin"
     assert "id" in user_dict
     assert "hashed_password" in user_dict

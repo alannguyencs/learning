@@ -13,6 +13,7 @@ class QuizNextResponse(BaseModel):
     question: str
     options: Dict[str, str]
     quiz_type: str
+    quiz_scope: Optional[str] = None
     topic_id: str
     lesson_id: int
     lesson_title: str
@@ -89,6 +90,7 @@ class QuizQuestionCreate(BaseModel):
     topic_name: str
     lesson_name: str
     quiz_type: str
+    quiz_scope: Optional[str] = None
     question: str
     quiz_learnt: str
     option_a: str

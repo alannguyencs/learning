@@ -20,6 +20,9 @@ Read a lesson file and generate quiz questions, then save them as a JSON file in
 4. Read the quiz system prompt at `.claude/skills/lesson-quiz-generate/quiz_system_prompt.md`
 5. Generate exactly **N** quiz questions from the lesson content following the system prompt rules:
    - Mix quiz types across: `recall`, `understanding`, `application`, `analysis`
+   - Mix quiz scopes across: `section`, `cross-section`, `synthesis`, `analogy`, `practical`
+   - Spread questions across both axes (type x scope) — see distribution table in system prompt
+   - If the lesson has no Story section, skip `analogy` scope; if no case study, skip `practical`
    - Alternate between single-answer and multiple-answer questions
    - Test deep understanding, not surface-level recall
 6. Save all N questions as a JSON array to `data/quiz/{lesson_filename}.json` (where `{lesson_filename}` is the lesson file's name without extension, e.g. `sample_lesson_1.json`). Create the `data/quiz/` directory if it doesn't exist.
@@ -32,6 +35,7 @@ Each question must have all these fields (matching the `QuizQuestion` model):
 |-------|------|-------------|
 | `lesson_title` | str | Title from the metadata JSON |
 | `quiz_type` | str | One of: recall, understanding, application, analysis |
+| `quiz_scope` | str | One of: section, cross-section, synthesis, analogy, practical |
 | `question` | str | The question text |
 | `quiz_learnt` | str | What the user learns from this question |
 | `option_a` | str | Option A text |
@@ -53,11 +57,11 @@ Write all N questions as a JSON array to `data/quiz/{lesson_filename}.json` (str
 
 After saving, print the output file path and a summary table:
 
-| # | Type | Question (first 60 chars) | Correct |
-|---|------|--------------------------|---------|
-| 1 | recall | ... | A |
-| 2 | understanding | ... | B, C |
-| ... | ... | ... | ... |
+| # | Type | Scope | Question (first 60 chars) | Correct |
+|---|------|-------|--------------------------|---------|
+| 1 | recall | section | ... | A |
+| 2 | understanding | cross-section | ... | B, C |
+| ... | ... | ... | ... | ... |
 
 ## Rules
 

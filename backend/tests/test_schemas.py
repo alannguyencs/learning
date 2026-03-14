@@ -28,13 +28,6 @@ def test_token_schema():
 
 def test_user_response_from_orm():
     """UserResponse works with from_attributes = True."""
-    user = UserResponse(id=1, username="testuser", role="admin")
+    user = UserResponse(id=1, username="testuser")
     assert user.id == 1
     assert user.username == "testuser"
-    assert user.role == "admin"
-
-
-def test_user_response_optional_role():
-    """UserResponse role defaults to None."""
-    user = UserResponse(id=1, username="testuser")
-    assert user.role is None

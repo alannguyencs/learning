@@ -17,10 +17,9 @@ class TestUserCRUD:
 
     def test_create_user(self, db_session):
         """Inserts and returns user."""
-        user = create_user(db_session, "testuser", "hashedpass", "admin")
+        user = create_user(db_session, "testuser", "hashedpass")
         assert user.username == "testuser"
         assert user.hashed_password == "hashedpass"
-        assert user.role == "admin"
         assert user.id is not None
 
     def test_get_user_by_username(self, db_session):

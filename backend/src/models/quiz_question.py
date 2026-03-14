@@ -19,6 +19,7 @@ class QuizQuestion(Base):
     topic_name = Column(String, nullable=True)
     lesson_name = Column(String, nullable=True)
     quiz_type = Column(String, nullable=False)
+    quiz_scope = Column(String, nullable=True)
     question = Column(Text, nullable=False)
     quiz_learnt = Column(Text, nullable=False)
     option_a = Column(Text, nullable=False)
