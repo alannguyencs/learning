@@ -98,6 +98,7 @@ async def get_next_quiz(
         quiz_type=question.quiz_type,
         quiz_scope=question.quiz_scope,
         topic_id=question.topic_id,
+        topic_name=question.topic_name,
         lesson_id=question.lesson_id,
         lesson_title=get_lesson_name(question.lesson_id),
         correct_option_count=len(question.correct_options),

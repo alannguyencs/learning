@@ -59,7 +59,10 @@ System updates the user's memory profile at all three levels
       v
 After all questions in the loop have been answered:
   User sees a loop summary: correct count, incorrect count, accuracy
-  User clicks "Next Loop" to begin another pass
+  Navigation options depend on the completed scope:
+    - Global scope: "Next Loop" (same global scope)
+    - Topic scope: "Next Loop - {topic}" or "Next Loop - All Topics"
+    - Lesson scope: "Next Loop - {lesson}", "Next Loop - {topic}", or "Next Loop - All Topics"
 ```
 
 ## How Smart Selection Works (MEMORIZE)
@@ -151,8 +154,10 @@ Questions test deep understanding, not surface-level memorization. All quiz type
 - [ ] User can click a lesson to view its full markdown content with proper formatting
 - [ ] User can click "Take Quiz" from a lesson page to start a quiz scoped to that lesson
 - [ ] After completing all questions in a loop (any scope), user sees a loop summary with correct/incorrect counts and accuracy
-- [ ] User can click "Next Loop" on the summary to start another pass
-- [ ] Loop counter increments on each completed pass
+- [ ] After a global-scope loop, user sees a single "Next Loop" button
+- [ ] After a topic-scope loop, user sees "Next Loop - {topic}" and "Next Loop - All Topics" buttons
+- [ ] After a lesson-scope loop, user sees "Next Loop - {lesson}", "Next Loop - {topic}", and "Next Loop - All Topics" buttons
+- [ ] Clicking a broader-scope button switches the quiz scope and starts a new loop in that scope
 - [ ] Loop size is min(10, total questions) for topic and global scopes
 
 ---

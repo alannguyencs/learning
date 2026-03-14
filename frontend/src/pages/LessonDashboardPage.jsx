@@ -186,7 +186,10 @@ const LessonDashboardPage = () => {
               <thead className="bg-gray-700 text-gray-300 text-sm uppercase tracking-wide">
                 <tr>
                   <th className="px-4 py-3">Title</th>
-                  <th className={`${thClass} w-48`} onClick={() => handleSort("topic")}>
+                  <th
+                    className={`${thClass} w-48`}
+                    onClick={() => handleSort("topic")}
+                  >
                     Topic{sortIndicator("topic")}
                   </th>
                   <th
@@ -201,7 +204,10 @@ const LessonDashboardPage = () => {
                   >
                     Accuracy{sortIndicator("accuracy")}
                   </th>
-                  <th className={`${thClass} w-36`} onClick={() => handleSort("published_date")}>
+                  <th
+                    className={`${thClass} w-36`}
+                    onClick={() => handleSort("published_date")}
+                  >
                     Published{sortIndicator("published_date")}
                   </th>
                 </tr>
@@ -225,9 +231,7 @@ const LessonDashboardPage = () => {
                       <td
                         className={`px-4 py-3 text-sm text-center font-medium ${recallColor(recall)}`}
                       >
-                        {recall !== null
-                          ? `${Math.round(recall * 100)}%`
-                          : "-"}
+                        {recall !== null ? `${Math.round(recall * 100)}%` : "-"}
                       </td>
                       <td
                         className={`px-4 py-3 text-sm text-center font-medium ${recallColor(accuracy)}`}

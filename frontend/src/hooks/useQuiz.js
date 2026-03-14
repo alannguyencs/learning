@@ -20,31 +20,35 @@ const useQuiz = () => {
   const [scope, setScope] = useState({ topicId: null, lessonId: null });
   const [loopProgress, setLoopProgress] = useState(INITIAL_LOOP);
 
-  const fetchNextQuiz = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    setQuiz(null);
+  const fetchNextQuiz = useCallback(
+    async (scopeOverride) => {
+      const s = scopeOverride || scope;
+      setLoading(true);
+      setError(null);
+      setResult(null);
+      setQuiz(null);
 
-    try {
-      const data = await apiService.getNextQuiz(scope.topicId, scope.lessonId);
-      setQuiz(data);
-      if (data.loop_question_count) {
-        setLoopProgress((prev) => ({
-          ...prev,
-          total: data.loop_question_count,
-        }));
+      try {
+        const data = await apiService.getNextQuiz(s.topicId, s.lessonId);
+        setQuiz(data);
+        if (data.loop_question_count) {
+          setLoopProgress((prev) => ({
+            ...prev,
+            total: data.loop_question_count,
+          }));
+        }
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setError("No quiz questions available for this selection.");
+        } else {
+          setError("Failed to load quiz. Please try again.");
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      if (err.response?.status === 404) {
-        setError("No quiz questions available for this selection.");
-      } else {
-        setError("Failed to load quiz. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [scope]);
+    },
+    [scope],
+  );
 
   const submitAnswer = useCallback(
     async (answer) => {
@@ -84,31 +88,35 @@ const useQuiz = () => {
     [quiz],
   );
 
-  const startNextLoop = useCallback(async () => {
-    setLoopProgress((prev) => ({
-      ...INITIAL_LOOP,
-      total: prev.total,
-      loopNumber: prev.loopNumber + 1,
-    }));
-    setResult(null);
-    setQuiz(null);
-    setUserAnswer(null);
-    setError(null);
+  const startNextLoop = useCallback(
+    async (scopeOverride) => {
+      const s = scopeOverride || scope;
+      setLoopProgress((prev) => ({
+        ...INITIAL_LOOP,
+        total: prev.total,
+        loopNumber: prev.loopNumber + 1,
+      }));
+      setResult(null);
+      setQuiz(null);
+      setUserAnswer(null);
+      setError(null);
 
-    setLoading(true);
-    try {
-      const data = await apiService.getNextQuiz(scope.topicId, scope.lessonId);
-      setQuiz(data);
-    } catch (err) {
-      if (err.response?.status === 404) {
-        setError("No quiz questions available for this selection.");
-      } else {
-        setError("Failed to load quiz. Please try again.");
+      setLoading(true);
+      try {
+        const data = await apiService.getNextQuiz(s.topicId, s.lessonId);
+        setQuiz(data);
+      } catch (err) {
+        if (err.response?.status === 404) {
+          setError("No quiz questions available for this selection.");
+        } else {
+          setError("Failed to load quiz. Please try again.");
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [scope]);
+    },
+    [scope],
+  );
 
   const skipQuestion = useCallback(() => {
     setLoopProgress((prev) => {

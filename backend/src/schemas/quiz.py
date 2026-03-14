@@ -15,6 +15,7 @@ class QuizNextResponse(BaseModel):
     quiz_type: str
     quiz_scope: Optional[str] = None
     topic_id: str
+    topic_name: Optional[str] = None
     lesson_id: int
     lesson_title: str
     correct_option_count: int

@@ -11,16 +11,34 @@ const baseProgress = {
   loopComplete: true,
 };
 
-describe("LoopSummary", () => {
-  it("renders loop number and total", () => {
-    render(<LoopSummary loopProgress={baseProgress} onNextLoop={jest.fn()} />);
+const globalScope = { topicId: null, lessonId: null };
+const topicScope = { topicId: "math", lessonId: null };
+const lessonScope = { topicId: "math", lessonId: 5 };
 
-    expect(screen.getByText("Loop 1 Complete")).toBeInTheDocument();
-    expect(screen.getByText("You answered all 10 questions")).toBeInTheDocument();
+describe("LoopSummary", () => {
+  it("renders heading and total", () => {
+    render(
+      <LoopSummary
+        loopProgress={baseProgress}
+        onNextLoop={jest.fn()}
+        scope={globalScope}
+      />,
+    );
+
+    expect(screen.getByText("Loop Complete")).toBeInTheDocument();
+    expect(
+      screen.getByText("You answered all 10 questions"),
+    ).toBeInTheDocument();
   });
 
   it("shows correct and incorrect counts", () => {
-    render(<LoopSummary loopProgress={baseProgress} onNextLoop={jest.fn()} />);
+    render(
+      <LoopSummary
+        loopProgress={baseProgress}
+        onNextLoop={jest.fn()}
+        scope={globalScope}
+      />,
+    );
 
     expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
@@ -29,32 +47,114 @@ describe("LoopSummary", () => {
   });
 
   it("shows accuracy percentage", () => {
-    render(<LoopSummary loopProgress={baseProgress} onNextLoop={jest.fn()} />);
+    render(
+      <LoopSummary
+        loopProgress={baseProgress}
+        onNextLoop={jest.fn()}
+        scope={globalScope}
+      />,
+    );
 
     expect(screen.getByText("70%")).toBeInTheDocument();
     expect(screen.getByText("Accuracy")).toBeInTheDocument();
   });
 
-  it("calls onNextLoop when button clicked", () => {
+  it("global scope shows single Next Loop button", () => {
     const onNextLoop = jest.fn();
-    render(<LoopSummary loopProgress={baseProgress} onNextLoop={onNextLoop} />);
+    render(
+      <LoopSummary
+        loopProgress={baseProgress}
+        onNextLoop={onNextLoop}
+        scope={globalScope}
+      />,
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: /next loop/i }));
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveTextContent("Next Loop");
 
-    expect(onNextLoop).toHaveBeenCalledTimes(1);
+    fireEvent.click(buttons[0]);
+    expect(onNextLoop).toHaveBeenCalledWith({
+      topicId: null,
+      lessonId: null,
+    });
   });
 
-  it("shows loop 2 for second pass", () => {
-    const loop2 = { ...baseProgress, loopNumber: 2, correct: 9, incorrect: 1 };
-    render(<LoopSummary loopProgress={loop2} onNextLoop={jest.fn()} />);
+  it("topic scope shows topic and all-topics buttons", () => {
+    const onNextLoop = jest.fn();
+    render(
+      <LoopSummary
+        loopProgress={baseProgress}
+        onNextLoop={onNextLoop}
+        scope={topicScope}
+        topicName="Mathematics"
+      />,
+    );
 
-    expect(screen.getByText("Loop 2 Complete")).toBeInTheDocument();
-    expect(screen.getByText("90%")).toBeInTheDocument();
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(2);
+    expect(buttons[0]).toHaveTextContent("Next Loop - Mathematics");
+    expect(buttons[1]).toHaveTextContent("Next Loop - All Topics");
+
+    fireEvent.click(buttons[0]);
+    expect(onNextLoop).toHaveBeenCalledWith({
+      topicId: "math",
+      lessonId: null,
+    });
+
+    fireEvent.click(buttons[1]);
+    expect(onNextLoop).toHaveBeenCalledWith({
+      topicId: null,
+      lessonId: null,
+    });
+  });
+
+  it("lesson scope shows lesson, topic, and all-topics buttons", () => {
+    const onNextLoop = jest.fn();
+    render(
+      <LoopSummary
+        loopProgress={baseProgress}
+        onNextLoop={onNextLoop}
+        scope={lessonScope}
+        topicName="Mathematics"
+        lessonTitle="Algebra Basics"
+      />,
+    );
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0]).toHaveTextContent("Next Loop - Algebra Basics");
+    expect(buttons[1]).toHaveTextContent("Next Loop - Mathematics");
+    expect(buttons[2]).toHaveTextContent("Next Loop - All Topics");
+
+    fireEvent.click(buttons[0]);
+    expect(onNextLoop).toHaveBeenCalledWith({
+      topicId: "math",
+      lessonId: 5,
+    });
+
+    fireEvent.click(buttons[1]);
+    expect(onNextLoop).toHaveBeenCalledWith({
+      topicId: "math",
+      lessonId: null,
+    });
+
+    fireEvent.click(buttons[2]);
+    expect(onNextLoop).toHaveBeenCalledWith({
+      topicId: null,
+      lessonId: null,
+    });
   });
 
   it("handles 0 total gracefully", () => {
     const empty = { ...baseProgress, total: 0, correct: 0, incorrect: 0 };
-    render(<LoopSummary loopProgress={empty} onNextLoop={jest.fn()} />);
+    render(
+      <LoopSummary
+        loopProgress={empty}
+        onNextLoop={jest.fn()}
+        scope={globalScope}
+      />,
+    );
 
     expect(screen.getByText("0%")).toBeInTheDocument();
   });

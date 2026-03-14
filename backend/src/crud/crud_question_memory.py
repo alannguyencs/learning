@@ -15,9 +15,7 @@ ALPHA = 0.3
 BETA = 0.2
 
 
-def get_or_create_memory(
-    db: Session, username: str, quiz_question_id: int
-) -> UserQuestionMemory:
+def get_or_create_memory(db: Session, username: str, quiz_question_id: int) -> UserQuestionMemory:
     """Get or lazily create a question memory record."""
     record = (
         db.query(UserQuestionMemory)

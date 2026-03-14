@@ -115,9 +115,7 @@ class TestQuestionMemoryCRUD:
         get_or_create_memory(db_session, "testuser", q1.id)
         get_or_create_memory(db_session, "testuser", q2.id)
 
-        results = get_question_memories_for_ids(
-            db_session, "testuser", [q1.id, q2.id]
-        )
+        results = get_question_memories_for_ids(db_session, "testuser", [q1.id, q2.id])
         assert len(results) == 2
 
     def test_update_memory_on_correct(self, db_session):

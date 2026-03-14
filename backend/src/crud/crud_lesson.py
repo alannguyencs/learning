@@ -40,12 +40,7 @@ def get_lesson_by_id(db: Session, lesson_id: int) -> Optional[Lesson]:
 
 def get_lessons_by_topic(db: Session, topic: str) -> list[Lesson]:
     """Select all lessons for a topic."""
-    return (
-        db.query(Lesson)
-        .filter(Lesson.topic == topic)
-        .order_by(Lesson.id)
-        .all()
-    )
+    return db.query(Lesson).filter(Lesson.topic == topic).order_by(Lesson.id).all()
 
 
 def get_all_lessons(db: Session) -> list[Lesson]:

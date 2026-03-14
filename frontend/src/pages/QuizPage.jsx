@@ -11,6 +11,10 @@ const QuizPage = () => {
   const [searchParams] = useSearchParams();
   const autoFetchRef = useRef(false);
   const [showingSummary, setShowingSummary] = useState(false);
+  const [loopMeta, setLoopMeta] = useState({
+    topicName: null,
+    lessonTitle: null,
+  });
   const {
     loading,
     quiz,
@@ -42,9 +46,24 @@ const QuizPage = () => {
     }
   }, [scope, fetchNextQuiz]);
 
+  // Capture topic/lesson names from quiz response for LoopSummary
+  // Also backfill scope.topicId when arriving via ?lessonId= URL param
+  useEffect(() => {
+    if (quiz) {
+      setLoopMeta({
+        topicName: quiz.topic_name || null,
+        lessonTitle: quiz.lesson_title || null,
+      });
+      if (scope.lessonId && !scope.topicId && quiz.topic_id) {
+        setScope((prev) => ({ ...prev, topicId: quiz.topic_id }));
+      }
+    }
+  }, [quiz, scope.lessonId, scope.topicId, setScope]);
+
   const handleScopeChange = (newScope) => {
     setScope(newScope);
     setShowingSummary(false);
+    setLoopMeta({ topicName: null, lessonTitle: null });
     reset();
     autoFetchRef.current = true;
   };
@@ -71,9 +90,20 @@ const QuizPage = () => {
     fetchNextQuiz();
   };
 
-  const handleNextLoop = () => {
+  const handleNextLoop = (newScope) => {
     setShowingSummary(false);
-    startNextLoop();
+    const sameScope =
+      newScope.topicId === scope.topicId &&
+      newScope.lessonId === scope.lessonId;
+
+    if (sameScope) {
+      startNextLoop();
+    } else {
+      setScope(newScope);
+      setLoopMeta({ topicName: null, lessonTitle: null });
+      reset();
+      startNextLoop(newScope);
+    }
   };
 
   return (
@@ -124,6 +154,9 @@ const QuizPage = () => {
           <LoopSummary
             loopProgress={loopProgress}
             onNextLoop={handleNextLoop}
+            scope={scope}
+            topicName={loopMeta.topicName}
+            lessonTitle={loopMeta.lessonTitle}
           />
         ) : (
           <>

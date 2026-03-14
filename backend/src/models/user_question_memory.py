@@ -36,12 +36,8 @@ class UserQuestionMemory(Base):
     correct_count = Column(Integer, nullable=False, default=0)
 
     __table_args__ = (
-        CheckConstraint(
-            "forgetting_rate > 0", name="ck_question_forgetting_rate_positive"
-        ),
-        UniqueConstraint(
-            "username", "quiz_question_id", name="uq_user_question_memory"
-        ),
+        CheckConstraint("forgetting_rate > 0", name="ck_question_forgetting_rate_positive"),
+        UniqueConstraint("username", "quiz_question_id", name="uq_user_question_memory"),
         Index("idx_question_memory_user", "username"),
     )
 
