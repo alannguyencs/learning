@@ -15,9 +15,7 @@ ALPHA = 0.3
 BETA = 0.2
 
 
-def get_or_create_memory(
-    db: Session, username: str, topic_id: str
-) -> UserTopicMemory:
+def get_or_create_memory(db: Session, username: str, topic_id: str) -> UserTopicMemory:
     """Get or lazily create a topic memory record with default n=0.3."""
     record = (
         db.query(UserTopicMemory)
@@ -72,11 +70,7 @@ def update_memory_on_quiz_result(
 
 def get_all_memory_states(db: Session, username: str) -> List[UserTopicMemory]:
     """Fetch all topic memory records for a user."""
-    return (
-        db.query(UserTopicMemory)
-        .filter(UserTopicMemory.username == username)
-        .all()
-    )
+    return db.query(UserTopicMemory).filter(UserTopicMemory.username == username).all()
 
 
 def get_recall_probabilities(

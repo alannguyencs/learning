@@ -7,19 +7,31 @@ const SummaryCard = ({ label, value, color }) => (
   </div>
 );
 
-const RecallSummary = ({ globalRecall, topicsAtRisk, lessonsAtRisk }) => {
-  const recallPct = `${Math.round(globalRecall * 100)}%`;
+const pctColor = (value) =>
+  value >= 0.7
+    ? "text-green-400"
+    : value >= 0.5
+      ? "text-yellow-400"
+      : "text-red-400";
 
-  const recallColor =
-    globalRecall >= 0.7
-      ? "text-green-400"
-      : globalRecall >= 0.5
-        ? "text-yellow-400"
-        : "text-red-400";
-
+const RecallSummary = ({
+  globalRecall,
+  globalAccuracy,
+  topicsAtRisk,
+  lessonsAtRisk,
+}) => {
   return (
     <div className="flex gap-4 flex-wrap">
-      <SummaryCard label="Global Recall" value={recallPct} color={recallColor} />
+      <SummaryCard
+        label="Global Recall"
+        value={`${Math.round(globalRecall * 100)}%`}
+        color={pctColor(globalRecall)}
+      />
+      <SummaryCard
+        label="Quiz Accuracy"
+        value={`${Math.round(globalAccuracy * 100)}%`}
+        color={pctColor(globalAccuracy)}
+      />
       <SummaryCard
         label="Topics at Risk"
         value={topicsAtRisk}

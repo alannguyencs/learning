@@ -44,13 +44,14 @@ def grade_and_update(db: Session, quiz_id: int, user_answer: List[str]) -> Optio
     # Store answer on QuizLog
     record_quiz_answer(db, quiz_id, user_answer, assessment_result)
 
-    # Update MEMORIZE memory at both levels
+    # Update MEMORIZE memory at all three levels (topic + lesson + question)
     current_quiz_count = get_user_total_quiz_count(db, quiz_log.username)
     update_memory(
         db,
         quiz_log.username,
         quiz_log.topic_id,
         quiz_log.lesson_id,
+        quiz_log.quiz_question_id,
         is_correct,
         current_quiz_count,
     )

@@ -15,7 +15,10 @@ class QuizNextResponse(BaseModel):
     quiz_type: str
     topic_id: str
     lesson_id: int
+    lesson_title: str
     correct_option_count: int
+    lesson_question_count: int
+    loop_question_count: int
 
 
 class QuizAnswerRequest(BaseModel):

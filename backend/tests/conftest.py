@@ -1,13 +1,17 @@
 """Pytest configuration and fixtures."""
 
-import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-from fastapi.testclient import TestClient
+import os
 
-from src.database import Base, get_db
-from src.main import app
+os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-for-pytest")
+
+import pytest  # noqa: E402
+from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy.orm import sessionmaker  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+from src.database import Base, get_db  # noqa: E402
+from src.main import app  # noqa: E402
 
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

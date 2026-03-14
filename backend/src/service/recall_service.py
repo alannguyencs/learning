@@ -7,7 +7,12 @@ from typing import Dict, List
 from sqlalchemy.orm import Session
 
 from src.crud.crud_lesson_memory import get_all_lesson_memories
-from src.crud.crud_quiz_log import get_all_quiz_logs, get_user_total_quiz_count
+from src.crud.crud_quiz_log import (
+    get_all_quiz_logs,
+    get_latest_accuracy_for_lesson,
+    get_user_total_quiz_count,
+)
+from src.crud.crud_quiz_question import get_question_count
 from src.crud.crud_topic_memory import get_all_memory_states
 from src.models.user_lesson_memory import UserLessonMemory
 from src.schemas.recall_dashboard import (
@@ -86,6 +91,9 @@ class RecallService:
 
             for lid in lesson_ids:
                 lm = lesson_mems.get(lid)
+                k = get_question_count(db, lid)
+                correct_last, total_q = get_latest_accuracy_for_lesson(db, username, lid, k)
+
                 if lm:
                     lesson_recall = lm.recall_probability(current_quiz_count)
                     lesson_item = LessonRecallItem(
@@ -94,8 +102,8 @@ class RecallService:
                         recall_probability=lesson_recall,
                         forgetting_rate=lm.forgetting_rate,
                         last_review_at=lm.last_review_at,
-                        review_count=lm.review_count,
-                        correct_count=lm.correct_count,
+                        review_count=total_q,
+                        correct_count=correct_last,
                     )
                 else:
                     lesson_recall = 1.0
@@ -105,14 +113,18 @@ class RecallService:
                         recall_probability=1.0,
                         forgetting_rate=0.3,
                         last_review_at=None,
-                        review_count=0,
-                        correct_count=0,
+                        review_count=total_q,
+                        correct_count=correct_last,
                     )
 
                 if lesson_recall < AT_RISK_THRESHOLD:
                     lessons_at_risk += 1
 
                 lesson_items.append(lesson_item)
+
+            # Aggregate topic accuracy from lessons
+            topic_total_q = sum(li.review_count for li in lesson_items)
+            topic_correct_last = sum(li.correct_count for li in lesson_items)
 
             topics.append(
                 TopicRecallItem(
@@ -122,19 +134,21 @@ class RecallService:
                     recall_probability=topic_recall,
                     forgetting_rate=topic_forgetting,
                     last_review_at=topic_last_review,
-                    review_count=topic_review_count,
-                    correct_count=topic_correct_count,
+                    review_count=topic_total_q,
+                    correct_count=topic_correct_last,
                     lessons=lesson_items,
                 )
             )
 
-        global_recall = (
-            sum(t.recall_probability for t in topics) / len(topics) if topics else 1.0
-        )
+        global_recall = sum(t.recall_probability for t in topics) / len(topics) if topics else 1.0
+        total_questions = sum(t.review_count for t in topics)
+        total_correct = sum(t.correct_count for t in topics)
+        global_accuracy = total_correct / total_questions if total_questions > 0 else 0.0
 
         return RecallMapResponse(
             topics=topics,
             global_recall=round(global_recall, 4),
+            global_accuracy=round(global_accuracy, 4),
             topics_at_risk=topics_at_risk,
             lessons_at_risk=lessons_at_risk,
         )

@@ -34,7 +34,9 @@ describe("Login", () => {
 
     expect(screen.getByLabelText(/user name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Learning App")).toBeInTheDocument();
   });
 

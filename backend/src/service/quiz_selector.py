@@ -1,9 +1,8 @@
-"""Quiz Selector — MEMORIZE-based two-level scheduling.
+"""Quiz Selector — MEMORIZE-based scheduling.
 
-Step 1: select_topic_for_quiz()  — topic with lowest m(t)
-Step 2: select_lesson_for_quiz() — lesson with lowest m(t) within topic
-Step 3: select_quiz_type()       — rotate through 4 types
-Step 4: select question from bank (dedup)
+Case 1 (lesson_id):  sliding window dedup, random order
+Case 2 (topic_id):   question-level recall, lowest m(t) first
+Case 3 (neither):    question-level recall across all topics
 """
 
 import logging
@@ -12,95 +11,69 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from src.crud.crud_quiz_log import (
-    get_seen_question_ids,
-    get_recent_quiz_types,
+    get_recent_question_ids_for_lesson,
+    get_recent_question_ids_for_topic,
+    get_recent_question_ids_global,
     get_user_total_quiz_count,
 )
-from src.crud.crud_quiz_question import get_question, get_question_count
-from src.crud.crud_topic_memory import get_all_memory_states
+from src.crud.crud_quiz_question import (
+    get_question_count,
+    get_question_count_for_topic,
+    get_question_for_lesson,
+    get_total_question_count,
+)
+from src.crud.crud_question_memory import get_question_memories_for_ids
 from src.crud.crud_lesson_memory import (
     get_or_create_memory as get_or_create_lesson_memory,
-    get_lesson_memories_for_topic,
 )
 from src.models.quiz_question import QuizQuestion
-from src.service.topic_lookup import (
-    get_all_topic_ids,
-    get_lessons_for_topic,
-    get_topic_for_lesson,
-)
+from src.service.topic_lookup import get_topic_for_lesson
 
 logger = logging.getLogger(__name__)
 
 RECALL_NEVER_REVIEWED = 0.0
-QUIZ_TYPES_ROTATION = ["recall", "understanding", "application", "analysis"]
+LOOP_SIZE_CAP = 10
 
 
-def select_topic_for_quiz(db: Session, username: str) -> Optional[str]:
-    """MEMORIZE: return the topic with the lowest recall m(t).
+def select_question_by_recall(
+    db: Session,
+    username: str,
+    topic_id: Optional[str] = None,
+    exclude_ids: Optional[List[int]] = None,
+) -> Optional[QuizQuestion]:
+    """Select the question with the lowest recall m(t) within scope.
 
-    Never-reviewed topics get m(t) = 0.0 to prioritize first review.
+    Never-answered questions get m(t) = 0.0 (highest priority).
+    All quiz types are eligible — no type rotation.
     """
-    current_quiz_count = get_user_total_quiz_count(db, username)
-    existing = {r.topic_id: r for r in get_all_memory_states(db, username)}
+    query = db.query(QuizQuestion)
+    if topic_id:
+        query = query.filter(QuizQuestion.topic_id == topic_id)
+    questions = query.all()
 
-    best_topic = None
-    lowest_recall = float("inf")
-
-    for topic_id in get_all_topic_ids():
-        if topic_id in existing:
-            recall = existing[topic_id].recall_probability(current_quiz_count)
-        else:
-            recall = RECALL_NEVER_REVIEWED
-
-        if recall < lowest_recall:
-            lowest_recall = recall
-            best_topic = topic_id
-
-    return best_topic
-
-
-def select_lesson_for_quiz(db: Session, username: str, topic_id: str) -> Optional[int]:
-    """MEMORIZE: return the lesson with the lowest recall m(t) within a topic.
-
-    Never-reviewed lessons get m(t) = 0.0 to prioritize first review.
-    Only considers lessons that have questions in the bank.
-    """
-    current_quiz_count = get_user_total_quiz_count(db, username)
-    lesson_ids = get_lessons_for_topic(topic_id)
-
-    if not lesson_ids:
+    if not questions:
         return None
 
-    existing = {r.lesson_id: r for r in get_lesson_memories_for_topic(db, username, topic_id)}
+    exclude_set = set(exclude_ids) if exclude_ids else set()
 
-    best_lesson = None
-    lowest_recall = float("inf")
+    qids = [q.id for q in questions]
+    existing = {r.quiz_question_id: r for r in get_question_memories_for_ids(db, username, qids)}
+    current_quiz_count = get_user_total_quiz_count(db, username)
 
-    for lid in lesson_ids:
-        if get_question_count(db, lid) == 0:
+    best = None
+    lowest = float("inf")
+    for q in questions:
+        if q.id in exclude_set:
             continue
-
-        if lid in existing:
-            recall = existing[lid].recall_probability(current_quiz_count)
+        mem = existing.get(q.id)
+        if mem and mem.review_count > 0:
+            recall = mem.recall_probability(current_quiz_count)
         else:
             recall = RECALL_NEVER_REVIEWED
-
-        if recall < lowest_recall:
-            lowest_recall = recall
-            best_lesson = lid
-
-    return best_lesson
-
-
-def select_quiz_type(db: Session, username: str, exclude_recent: int = 3) -> str:
-    """Rotate through quiz types, skipping recently used ones."""
-    recent_types = get_recent_quiz_types(db, username, limit=exclude_recent)
-
-    for quiz_type in QUIZ_TYPES_ROTATION:
-        if quiz_type not in recent_types:
-            return quiz_type
-
-    return QUIZ_TYPES_ROTATION[0]
+        if recall < lowest:
+            lowest = recall
+            best = q
+    return best
 
 
 def select_quiz(
@@ -109,51 +82,36 @@ def select_quiz(
     topic_id: Optional[str] = None,
     lesson_id: Optional[int] = None,
 ) -> Optional[QuizQuestion]:
-    """Main entry point — resolves scope, selects topic/lesson/type/question.
+    """Main entry point — resolves scope, selects question.
 
     Scope resolution:
-    - lesson_id provided → skip both selectors
-    - topic_id provided → skip topic selector
-    - neither → use both selectors
+    - lesson_id provided → sliding window dedup, random order (Case 1)
+    - topic_id provided → question-level recall within topic (Case 2)
+    - neither → question-level recall across all topics (Case 3)
     """
-    # Resolve scope
+    # Case 1: lesson-scoped — sliding window dedup, random order
     if lesson_id is not None:
         resolved_topic = get_topic_for_lesson(lesson_id)
-        resolved_lesson = lesson_id
-    elif topic_id is not None:
-        resolved_topic = topic_id
-        resolved_lesson = select_lesson_for_quiz(db, username, topic_id)
+        if resolved_topic:
+            get_or_create_lesson_memory(db, username, resolved_topic, lesson_id)
+
+        total = get_question_count(db, lesson_id)
+        window = max(total - 1, 0)
+        exclude_ids = get_recent_question_ids_for_lesson(db, username, lesson_id, window)
+        return get_question_for_lesson(db, lesson_id, exclude_ids=exclude_ids or None)
+
+    # Cases 2 & 3: question-level recall selection
+    if topic_id is not None:
+        total = get_question_count_for_topic(db, topic_id)
     else:
-        resolved_topic = select_topic_for_quiz(db, username)
-        if resolved_topic is None:
-            return None
-        resolved_lesson = select_lesson_for_quiz(db, username, resolved_topic)
+        total = get_total_question_count(db)
 
-    if resolved_lesson is None:
-        return None
+    loop_size = min(LOOP_SIZE_CAP, total)
+    window = max(loop_size - 1, 0)
 
-    # Ensure lesson memory exists
-    if resolved_topic:
-        get_or_create_lesson_memory(db, username, resolved_topic, resolved_lesson)
+    if topic_id is not None:
+        exclude_ids = get_recent_question_ids_for_topic(db, username, topic_id, window)
+    else:
+        exclude_ids = get_recent_question_ids_global(db, username, window)
 
-    # Select quiz type
-    quiz_type = select_quiz_type(db, username)
-
-    # Get question with dedup
-    seen_ids = get_seen_question_ids(db, username, resolved_lesson, quiz_type)
-    question = get_question(db, resolved_lesson, quiz_type, exclude_ids=seen_ids)
-
-    # If no unseen questions for this type, try without dedup
-    if question is None:
-        question = get_question(db, resolved_lesson, quiz_type, exclude_ids=None)
-
-    # If still none, try other quiz types
-    if question is None:
-        for alt_type in QUIZ_TYPES_ROTATION:
-            if alt_type == quiz_type:
-                continue
-            question = get_question(db, resolved_lesson, alt_type, exclude_ids=None)
-            if question is not None:
-                break
-
-    return question
+    return select_question_by_recall(db, username, topic_id=topic_id, exclude_ids=exclude_ids)

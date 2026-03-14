@@ -12,12 +12,21 @@ from src.service.recall_service import RecallService
 
 def _create_question(db, topic_id="t1", lesson_id=1, quiz_type="recall"):
     q = QuizQuestion(
-        topic_id=topic_id, lesson_id=lesson_id, lesson_filename="test.md",
-        quiz_type=quiz_type, question="Q?", quiz_learnt="Learn",
-        option_a="A", option_b="B", option_c="C", option_d="D",
+        topic_id=topic_id,
+        lesson_id=lesson_id,
+        lesson_filename="test.md",
+        quiz_type=quiz_type,
+        question="Q?",
+        quiz_learnt="Learn",
+        option_a="A",
+        option_b="B",
+        option_c="C",
+        option_d="D",
         correct_options=["B"],
-        response_to_user_option_a="eA", response_to_user_option_b="eB",
-        response_to_user_option_c="eC", response_to_user_option_d="eD",
+        response_to_user_option_a="eA",
+        response_to_user_option_b="eB",
+        response_to_user_option_c="eC",
+        response_to_user_option_d="eD",
         quiz_take_away="TK",
     )
     db.add(q)
@@ -87,6 +96,7 @@ class TestRecallMap:
         try:
             result = RecallService.get_recall_map(db_session, "user1")
             assert result.global_recall == 1.0
+            assert result.global_accuracy == 0.0
             assert result.topics_at_risk == 0
             assert result.lessons_at_risk == 0
             assert len(result.topics) == 2
@@ -96,7 +106,11 @@ class TestRecallMap:
             _stop_patches(patches)
 
     def test_recall_map_with_topic_data(self, db_session):
-        """Correct topic m(t) computation with memory records."""
+        """Correct topic m(t) computation with memory records.
+
+        Accuracy uses latest answer per unique question:
+        review_count = K (total questions), correct_count = latest correct.
+        """
         patches = _apply_patches()
         try:
             # Create topic memory with some reviews
@@ -107,21 +121,28 @@ class TestRecallMap:
             tm.last_review_at = datetime(2025, 1, 1)
             db_session.commit()
 
-            # Create multiple quiz logs so elapsed > 0
+            # Create 1 question for lesson 1 and answer it correctly
             q = _create_question(db_session, "t1", 1)
-            for _ in range(5):
+            log = create_quiz_log(db_session, "user1", q.id, "t1", 1, "recall")
+            record_quiz_answer(db_session, log.id, ["B"], "correct")
+            # Extra logs for elapsed count
+            for _ in range(4):
                 create_quiz_log(db_session, "user1", q.id, "t1", 1, "recall")
 
             result = RecallService.get_recall_map(db_session, "user1")
             t1_data = next(t for t in result.topics if t.topic_id == "t1")
-            assert t1_data.review_count == 5
-            assert t1_data.correct_count == 4
+            # review_count = K across all lessons (1 question in lesson 1, 0 in lesson 2)
+            assert t1_data.review_count == 1
+            assert t1_data.correct_count == 1
             assert t1_data.recall_probability < 1.0  # has decayed (elapsed=4)
         finally:
             _stop_patches(patches)
 
     def test_recall_map_with_lesson_data(self, db_session):
-        """Correct lesson m(t) nested in topics."""
+        """Correct lesson accuracy: latest answer per unique question.
+
+        review_count = K (total questions), correct_count = latest correct.
+        """
         patches = _apply_patches()
         try:
             lm = get_or_create_lesson(db_session, "user1", "t1", 1)
@@ -131,16 +152,23 @@ class TestRecallMap:
             lm.last_review_at = datetime(2025, 1, 1)
             db_session.commit()
 
-            # Create multiple quiz logs so elapsed > 0
+            # Create 1 question for lesson 1, answer wrong then correct
             q = _create_question(db_session, "t1", 1)
-            for _ in range(5):
+            log1 = create_quiz_log(db_session, "user1", q.id, "t1", 1, "recall")
+            record_quiz_answer(db_session, log1.id, ["A"], "incorrect")
+            log2 = create_quiz_log(db_session, "user1", q.id, "t1", 1, "recall")
+            record_quiz_answer(db_session, log2.id, ["B"], "correct")
+            # Extra logs for elapsed count
+            for _ in range(3):
                 create_quiz_log(db_session, "user1", q.id, "t1", 1, "recall")
 
             result = RecallService.get_recall_map(db_session, "user1")
             t1_data = next(t for t in result.topics if t.topic_id == "t1")
             l1_data = next(l for l in t1_data.lessons if l.lesson_id == 1)
-            assert l1_data.review_count == 3
-            assert l1_data.recall_probability < 1.0  # elapsed=4
+            # review_count = K = 1 (only 1 question), correct_count = 1 (latest answer is correct)
+            assert l1_data.review_count == 1
+            assert l1_data.correct_count == 1
+            assert l1_data.recall_probability < 1.0  # elapsed > 0
         finally:
             _stop_patches(patches)
 
@@ -150,6 +178,7 @@ class TestRecallMap:
         try:
             # Create topic with high forgetting rate and many quizzes elapsed
             tm = get_or_create_topic(db_session, "user1", "t1")
+            tm.review_count = 1
             tm.forgetting_rate = 1.5
             tm.last_review_quiz_count = 1
             tm.last_review_at = datetime(2025, 1, 1)
@@ -170,6 +199,7 @@ class TestRecallMap:
         patches = _apply_patches()
         try:
             lm = get_or_create_lesson(db_session, "user1", "t1", 1)
+            lm.review_count = 1
             lm.forgetting_rate = 1.5
             lm.last_review_quiz_count = 1
             lm.last_review_at = datetime(2025, 1, 1)

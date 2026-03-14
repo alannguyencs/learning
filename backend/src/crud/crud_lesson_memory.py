@@ -96,8 +96,4 @@ def get_lesson_memories_for_topic(
 
 def get_all_lesson_memories(db: Session, username: str) -> List[UserLessonMemory]:
     """All lesson memories for a user."""
-    return (
-        db.query(UserLessonMemory)
-        .filter(UserLessonMemory.username == username)
-        .all()
-    )
+    return db.query(UserLessonMemory).filter(UserLessonMemory.username == username).all()

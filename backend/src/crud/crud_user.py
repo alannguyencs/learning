@@ -20,9 +20,7 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[Users]:
     return db.query(Users).filter(Users.id == user_id).first()
 
 
-def create_user(
-    db: Session, username: str, hashed_password: str
-) -> Users:
+def create_user(db: Session, username: str, hashed_password: str) -> Users:
     """Create a new user."""
     db_user = Users(username=username, hashed_password=hashed_password)
     db.add(db_user)

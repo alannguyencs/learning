@@ -31,8 +31,9 @@ This feature reads from models defined in the Quiz technical doc:
 - **`UserTopicMemory`** — Per-topic forgetting rate, review counts, and last-review checkpoint. Used to calculate topic-level recall probability.
 - **`UserLessonMemory`** — Per-lesson forgetting rate, review counts, and last-review checkpoint. Used to calculate lesson-level recall probability. Includes `topic_id` for grouping.
 - **`QuizLog`** — Individual quiz records with `topic_id`, `lesson_id`, and results. Used to build the topic matrix grid.
+- **`Lesson`** — Normalized lesson records. Lesson names displayed in the recall dashboard are resolved from the `lessons` table via the `topic_lookup` in-memory cache (which syncs from the `lessons` table on startup).
 
-No additional tables are needed for this feature.
+No additional tables are created by this feature, but it reads from the `Lesson` table indirectly via the topic lookup cache.
 
 ## Pipeline
 
@@ -134,6 +135,7 @@ Applied at both topic and lesson level:
 |-------|------|-------------|
 | `topics` | list[TopicRecallItem] | Per-topic recall data with nested lessons |
 | `global_recall` | float | Mean m(t) across all topics |
+| `global_accuracy` | float | Overall correct / total across all topics |
 | `topics_at_risk` | int | Count of topics with m(t) < 0.5 |
 | `lessons_at_risk` | int | Count of lessons with m(t) < 0.5 |
 
@@ -216,7 +218,7 @@ This feature reuses CRUD operations defined in the Quiz feature:
 
 - **RecallHeatmap** — Grid of topic cards. Each card shows the topic name and is colored green/yellow/red based on topic-level `recall_probability`. Shows `review_count` and accuracy percentage within each card. Cards are expandable to show a nested list of lessons with their own color-coded recall scores.
 - **LessonRecallList** — Nested within an expanded topic card. Lists each lesson with its recall score, color indicator, quiz count, and accuracy. Includes a button to start a quiz for that specific lesson.
-- **RecallSummary** — Displays `global_recall` as a percentage, `topics_at_risk` count, and `lessons_at_risk` count.
+- **RecallSummary** — Displays `global_recall` as a percentage, `global_accuracy` as a percentage (correct/total across all topics), `topics_at_risk` count, and `lessons_at_risk` count.
 - **TopicMatrix** — Grid table. Rows are topics (sorted by most recent quiz). Columns are chronological quiz attempts. Each cell is colored by result: green (correct), red (incorrect), grey (pending). Cell tooltip shows the lesson name.
 - **QuizLaunchButton** — Navigates the user to the quiz page. Appears on topic cards (pre-fills topic scope) and lesson rows (pre-fills lesson scope).
 

@@ -14,7 +14,6 @@ const RecallDashboardPage = () => {
     topicMatrix,
     expandedTopics,
     toggleTopic,
-    refresh,
   } = useDashboardData();
 
   return (
@@ -22,12 +21,20 @@ const RecallDashboardPage = () => {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-white">Recall Dashboard</h1>
-          <button
-            onClick={() => navigate("/quiz")}
-            className="px-4 py-2 rounded border border-gray-500 text-gray-300 hover:bg-gray-600 hover:text-white transition-colors text-sm font-medium"
-          >
-            Go to Quiz
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-4 py-2 rounded border border-gray-500 text-gray-300 hover:bg-gray-600 hover:text-white transition-colors text-sm font-medium"
+            >
+              Lessons
+            </button>
+            <button
+              onClick={() => navigate("/quiz")}
+              className="px-4 py-2 rounded border border-gray-500 text-gray-300 hover:bg-gray-600 hover:text-white transition-colors text-sm font-medium"
+            >
+              Quiz
+            </button>
+          </div>
         </div>
 
         {loading && (
@@ -50,6 +57,7 @@ const RecallDashboardPage = () => {
               </h2>
               <RecallSummary
                 globalRecall={recallMap.global_recall}
+                globalAccuracy={recallMap.global_accuracy}
                 topicsAtRisk={recallMap.topics_at_risk}
                 lessonsAtRisk={recallMap.lessons_at_risk}
               />

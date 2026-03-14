@@ -121,33 +121,39 @@ CRUD: UPDATE QuizLog + UserTopicMemory + UserLessonMemory
 Return result + quiz_learnt + explanations (all 4 options) + quiz_take_away to frontend
 ```
 
-## Quiz Upload Pipeline — [details](./quiz.md)
+## Lesson Upload Pipeline — [details](./quiz.md)
 
 ```
-Local agent generates quiz questions from lesson file (LLM call)
+Pre-requisite: lesson-youtube + lesson-quiz-generate already ran
+  ├── data/lesson/{name}.md       (lesson markdown)
+  ├── data/metadata/{name}.json   (video metadata)
+  └── data/quiz/{name}.json       (10 quiz questions)
   │
   ▼
 Agent reads .env for WEBAPP_ACCESS_TOKEN and WEBAPP_API_URL
   │
   ▼
-Agent writes questions to temp JSON file
+Resolve topic from metadata (channel name → topic_id + topic_name)
   │
   ▼
-POST /api/quiz/questions  (Authorization: Bearer <token>)
+POST /api/lessons  (Authorization: Bearer <token>)
+  ├── Body: { topic, topic_name, title, published_date, content }
+  └── Response: { id (lesson_id), topic, title, ... }
   │
   ▼
-authenticate_user_from_request()
-  ├── Cookie not present → check Authorization header
-  └── Decode Bearer token as JWT → look up user
+Enrich quiz questions with topic_id, lesson_id, topic_name, lesson_name, lesson_filename
+  │
+  ▼
+POST /api/quiz/questions  (one question at a time, Bearer auth)
   │
   ▼
 Validate List[QuizQuestionCreate] request body
   │
   ▼
-CRUD: db.add_all(QuizQuestion objects) → bulk INSERT
+CRUD: db.add(QuizQuestion) → INSERT + register_topic()
   │
   ▼
-Return { inserted, lesson_id, topic_id }
+Return { lesson_id, topic_id, questions inserted }
 ```
 
 ## Recall Dashboard Pipeline — [details](./recall_dashboard.md)

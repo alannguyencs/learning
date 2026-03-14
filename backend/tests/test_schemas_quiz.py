@@ -32,18 +32,28 @@ def test_quiz_answer_request_empty():
 def test_quiz_next_response():
     """All fields present."""
     resp = QuizNextResponse(
-        quiz_id=1, question="What?", options={"A": "a", "B": "b", "C": "c", "D": "d"},
-        quiz_type="recall", topic_id="t1", lesson_id=1, correct_option_count=1,
+        quiz_id=1,
+        question="What?",
+        options={"A": "a", "B": "b", "C": "c", "D": "d"},
+        quiz_type="recall",
+        topic_id="t1",
+        lesson_id=1,
+        lesson_title="Test Lesson",
+        correct_option_count=1,
+        lesson_question_count=10,
+        loop_question_count=10,
     )
     assert resp.quiz_id == 1
     assert resp.quiz_type == "recall"
     assert resp.correct_option_count == 1
+    assert resp.lesson_question_count == 10
 
 
 def test_quiz_answer_response():
     """Includes quiz_learnt, explanations, quiz_take_away."""
     resp = QuizAnswerResponse(
-        is_correct=True, correct_options=["B"],
+        is_correct=True,
+        correct_options=["B"],
         quiz_learnt="Learning about X",
         explanations={"A": "eA", "B": "eB", "C": "eC", "D": "eD"},
         quiz_take_away="Key takeaway",

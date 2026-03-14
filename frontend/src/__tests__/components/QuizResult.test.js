@@ -29,39 +29,45 @@ const incorrectResult = {
 };
 
 describe("QuizResult", () => {
-  it("shows correct badge when answer is correct", () => {
-    render(<QuizResult result={correctResult} />);
+  it("shows correct option explanation when answer is correct", () => {
+    render(<QuizResult result={correctResult} userAnswer={["B"]} />);
 
-    expect(screen.getByText("Correct!")).toBeInTheDocument();
+    expect(
+      screen.getByText("Paris is indeed the capital of France"),
+    ).toBeInTheDocument();
   });
 
-  it("shows incorrect badge with correct options", () => {
-    render(<QuizResult result={incorrectResult} />);
+  it("shows wrong selection explanation when answer is incorrect", () => {
+    render(<QuizResult result={incorrectResult} userAnswer={["A"]} />);
 
-    expect(screen.getByText("Incorrect")).toBeInTheDocument();
-    expect(screen.getByText(/Correct: B/)).toBeInTheDocument();
+    expect(
+      screen.getByText("London is the capital of the UK"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Paris is indeed the capital of France"),
+    ).toBeInTheDocument();
   });
 
-  it("displays quiz_learnt section", () => {
-    render(<QuizResult result={correctResult} />);
+  it("does not show wrong selections section when correct", () => {
+    const { container } = render(
+      <QuizResult result={correctResult} userAnswer={["B"]} />,
+    );
 
-    expect(screen.getByText("Paris is the capital of France")).toBeInTheDocument();
-  });
-
-  it("displays all 4 explanations", () => {
-    render(<QuizResult result={correctResult} />);
-
-    expect(screen.getByText("London is the capital of the UK")).toBeInTheDocument();
-    expect(screen.getByText("Paris is indeed the capital of France")).toBeInTheDocument();
-    expect(screen.getByText("Berlin is the capital of Germany")).toBeInTheDocument();
-    expect(screen.getByText("Madrid is the capital of Spain")).toBeInTheDocument();
+    const redBorders = container.querySelectorAll(".border-red-500\\/30");
+    expect(redBorders.length).toBe(0);
   });
 
   it("displays quiz_take_away", () => {
-    render(<QuizResult result={correctResult} />);
+    render(<QuizResult result={correctResult} userAnswer={["B"]} />);
 
     expect(
       screen.getByText("European capitals are important to know"),
     ).toBeInTheDocument();
+  });
+
+  it("displays Key Takeaway heading", () => {
+    render(<QuizResult result={correctResult} userAnswer={["B"]} />);
+
+    expect(screen.getByText("Key Takeaway")).toBeInTheDocument();
   });
 });

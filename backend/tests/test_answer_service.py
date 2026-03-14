@@ -13,11 +13,16 @@ def _create_question(db, correct_options=None):
     if correct_options is None:
         correct_options = ["B"]
     q = QuizQuestion(
-        topic_id="t1", lesson_id=1, lesson_filename="test.md",
-        quiz_type="recall", question="What is X?",
+        topic_id="t1",
+        lesson_id=1,
+        lesson_filename="test.md",
+        quiz_type="recall",
+        question="What is X?",
         quiz_learnt="Learning about X",
-        option_a="A answer", option_b="B answer",
-        option_c="C answer", option_d="D answer",
+        option_a="A answer",
+        option_b="B answer",
+        option_c="C answer",
+        option_d="D answer",
         correct_options=correct_options,
         response_to_user_option_a="Explanation A",
         response_to_user_option_b="Explanation B",

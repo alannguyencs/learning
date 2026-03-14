@@ -1,8 +1,9 @@
 """CRUD operations for QuizLog."""
 
 import logging
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.models.quiz_log import QuizLog
@@ -54,10 +55,8 @@ def get_quiz_log_by_id(db: Session, quiz_id: int) -> Optional[QuizLog]:
     return db.query(QuizLog).filter(QuizLog.id == quiz_id).first()
 
 
-def get_seen_question_ids(
-    db: Session, username: str, lesson_id: int, quiz_type: str
-) -> List[int]:
-    """Get IDs of questions already seen by user for deduplication."""
+def get_seen_question_ids(db: Session, username: str, lesson_id: int, quiz_type: str) -> List[int]:
+    """Get IDs of questions already seen by user for deduplication (per quiz_type)."""
     rows = (
         db.query(QuizLog.quiz_question_id)
         .filter(
@@ -68,6 +67,56 @@ def get_seen_question_ids(
         .all()
     )
     return [r[0] for r in rows]
+
+
+def get_recent_question_ids_for_lesson(
+    db: Session, username: str, lesson_id: int, limit: int
+) -> List[int]:
+    """Get the most recent N question IDs served for a lesson (sliding window dedup).
+
+    Returns distinct IDs from the last `limit` quiz_log entries, ordered by most recent.
+    This ensures all questions are cycled through before any repeat.
+    """
+    rows = (
+        db.query(QuizLog.quiz_question_id)
+        .filter(
+            QuizLog.username == username,
+            QuizLog.lesson_id == lesson_id,
+        )
+        .order_by(QuizLog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return list({r[0] for r in rows})
+
+
+def get_recent_question_ids_for_topic(
+    db: Session, username: str, topic_id: str, limit: int
+) -> List[int]:
+    """Get the most recent N question IDs served for a topic (sliding window dedup)."""
+    rows = (
+        db.query(QuizLog.quiz_question_id)
+        .filter(
+            QuizLog.username == username,
+            QuizLog.topic_id == topic_id,
+        )
+        .order_by(QuizLog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return list({r[0] for r in rows})
+
+
+def get_recent_question_ids_global(db: Session, username: str, limit: int) -> List[int]:
+    """Get the most recent N question IDs served globally (sliding window dedup)."""
+    rows = (
+        db.query(QuizLog.quiz_question_id)
+        .filter(QuizLog.username == username)
+        .order_by(QuizLog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return list({r[0] for r in rows})
 
 
 def get_quiz_history(
@@ -122,6 +171,51 @@ def get_all_quiz_logs(db: Session, username: str) -> List[QuizLog]:
         .order_by(QuizLog.created_at.asc())
         .all()
     )
+
+
+def get_latest_accuracy_for_lesson(
+    db: Session,
+    username: str,
+    lesson_id: int,
+    question_count: int,
+) -> Tuple[int, int]:
+    """Compute accuracy from the latest answer per unique question.
+
+    For each of the K questions in a lesson, find the most recent answered
+    quiz_log entry. Return (num_correct, K).
+    """
+    # Subquery: max created_at per question (only answered logs)
+    latest = (
+        db.query(
+            QuizLog.quiz_question_id,
+            func.max(QuizLog.created_at).label("max_ts"),
+        )
+        .filter(
+            QuizLog.username == username,
+            QuizLog.lesson_id == lesson_id,
+            QuizLog.assessment_result.isnot(None),
+        )
+        .group_by(QuizLog.quiz_question_id)
+        .subquery()
+    )
+
+    correct = (
+        db.query(func.count())
+        .select_from(QuizLog)
+        .join(
+            latest,
+            (QuizLog.quiz_question_id == latest.c.quiz_question_id)
+            & (QuizLog.created_at == latest.c.max_ts),
+        )
+        .filter(
+            QuizLog.username == username,
+            QuizLog.lesson_id == lesson_id,
+            QuizLog.assessment_result == "correct",
+        )
+        .scalar()
+    )
+
+    return correct or 0, question_count
 
 
 def get_quiz_stats(db: Session, username: str) -> dict:

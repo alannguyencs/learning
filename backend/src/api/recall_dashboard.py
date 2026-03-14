@@ -19,9 +19,7 @@ def _get_user_or_401(request: Request, db: Session):
     """Authenticate user or raise 401."""
     user = authenticate_user_from_request(request, db)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     return user
 
 

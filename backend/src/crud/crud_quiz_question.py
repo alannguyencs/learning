@@ -3,6 +3,7 @@
 import logging
 from typing import List, Optional
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.models.quiz_question import QuizQuestion
@@ -24,6 +25,20 @@ def get_question(
     if exclude_ids:
         query = query.filter(QuizQuestion.id.notin_(exclude_ids))
     return query.order_by(QuizQuestion.id).first()
+
+
+def get_question_for_lesson(
+    db: Session,
+    lesson_id: int,
+    exclude_ids: Optional[List[int]] = None,
+) -> Optional[QuizQuestion]:
+    """Select a random question from any quiz type for a lesson, excluding already-seen IDs."""
+    query = db.query(QuizQuestion).filter(
+        QuizQuestion.lesson_id == lesson_id,
+    )
+    if exclude_ids:
+        query = query.filter(QuizQuestion.id.notin_(exclude_ids))
+    return query.order_by(func.random()).first()
 
 
 def get_question_by_id(db: Session, question_id: int) -> Optional[QuizQuestion]:

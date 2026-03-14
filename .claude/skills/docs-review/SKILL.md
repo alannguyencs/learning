@@ -1,3 +1,13 @@
+---
+name: docs-review
+description: Review documentation quality for docs/abstract/ and
+  docs/technical/ against the documentation hierarchy rules. Use when user
+  says "review docs", "check documentation", "doc quality", "review-docs",
+  or "validate docs".
+---
+
+# Review Docs
+
 Review documentation quality for `docs/abstract/` and `docs/technical/` against the rules in `docs/documentation_hierarchy.md`.
 
 If $ARGUMENTS is provided, review only the specified file(s). Otherwise review all files in both directories.
@@ -22,7 +32,7 @@ For each file, check and report violations:
 1. **Related Docs link** — has `## Related Docs` linking to the abstract file
 2. **Architecture section** — has `## Architecture`
 3. **Data Model** — uses SQLAlchemy class name (e.g., `**`UserPrincipleProgress`**`), not database table name (e.g., ~~`Table: coach_user_principle_progress_260202`~~)
-4. **Pipeline diagram** — has `## Pipeline` section with vertical ASCII diagram (uses `│`, `▼`, `├──`, `└──`), not horizontal multi-column sequence diagrams
+4. **Pipeline diagram** — has `## Pipeline` section with vertical ASCII diagram (uses `|`, `▼`, `├──`, `└──`), not horizontal multi-column sequence diagrams
 5. **Algorithms** — if present, uses bullet points under `### H3` headings, not wall-of-text paragraphs
 6. **API Layer** — has `## Backend — API Layer` with endpoint table
 7. **Service Layer** — has `## Backend — Service Layer`

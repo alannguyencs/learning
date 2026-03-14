@@ -18,6 +18,27 @@ const TopicLessonFilter = ({ scope, onScopeChange }) => {
     loadTopics();
   }, []);
 
+  // Sync internal state when scope changes externally (e.g. URL params)
+  useEffect(() => {
+    if (topics.length === 0) return;
+
+    if (scope.lessonId) {
+      const topic = topics.find((t) =>
+        t.lessons.some((l) => l.lesson_id === scope.lessonId),
+      );
+      if (topic) {
+        setSelectedTopic(topic.topic_id);
+        setSelectedLesson(String(scope.lessonId));
+      }
+    } else if (scope.topicId) {
+      setSelectedTopic(scope.topicId);
+      setSelectedLesson("");
+    } else {
+      setSelectedTopic("");
+      setSelectedLesson("");
+    }
+  }, [topics, scope.lessonId, scope.topicId]);
+
   const handleTopicChange = (e) => {
     const topicId = e.target.value;
     setSelectedTopic(topicId);

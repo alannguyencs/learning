@@ -22,13 +22,21 @@ def _login(client, db_session, username="testuser"):
 def _create_question(db, topic_id="t1", lesson_id=1, quiz_type="recall"):
     """Helper to create test quiz question."""
     q = QuizQuestion(
-        topic_id=topic_id, lesson_id=lesson_id, lesson_filename="test.md",
-        quiz_type=quiz_type, question="What is X?", quiz_learnt="Learn X",
-        option_a="A answer", option_b="B answer",
-        option_c="C answer", option_d="D answer",
+        topic_id=topic_id,
+        lesson_id=lesson_id,
+        lesson_filename="test.md",
+        quiz_type=quiz_type,
+        question="What is X?",
+        quiz_learnt="Learn X",
+        option_a="A answer",
+        option_b="B answer",
+        option_c="C answer",
+        option_d="D answer",
         correct_options=["B"],
-        response_to_user_option_a="eA", response_to_user_option_b="eB",
-        response_to_user_option_c="eC", response_to_user_option_d="eD",
+        response_to_user_option_a="eA",
+        response_to_user_option_b="eB",
+        response_to_user_option_c="eC",
+        response_to_user_option_d="eD",
         quiz_take_away="TK",
     )
     db.add(q)
@@ -63,6 +71,8 @@ class TestQuizNextEndpoint:
         assert "quiz_id" in data
         assert "options" in data
         assert data["correct_option_count"] == 1
+        assert data["lesson_question_count"] == 1
+        assert data["loop_question_count"] == 1
 
 
 class TestQuizAnswerEndpoint:

@@ -78,6 +78,19 @@ const apiService = {
     const response = await api.get("/api/quiz/topic-matrix");
     return response.data;
   },
+
+  getLessons: async (topic) => {
+    const params = new URLSearchParams();
+    if (topic) params.append("topic", topic);
+    const query = params.toString() ? `?${params}` : "";
+    const response = await api.get(`/api/lessons${query}`);
+    return response.data;
+  },
+
+  getLessonById: async (lessonId) => {
+    const response = await api.get(`/api/lessons/${lessonId}`);
+    return response.data;
+  },
 };
 
 export default apiService;

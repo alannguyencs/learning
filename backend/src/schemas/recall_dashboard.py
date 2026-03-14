@@ -37,6 +37,7 @@ class RecallMapResponse(BaseModel):
 
     topics: List[TopicRecallItem]
     global_recall: float
+    global_accuracy: float
     topics_at_risk: int
     lessons_at_risk: int
 

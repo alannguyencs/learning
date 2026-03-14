@@ -14,10 +14,18 @@ PURPLE='\033[0;35m'
 NC='\033[0m' # No Color
 
 # Configuration
-BACKEND_PORT=8000
-FRONTEND_PORT=3000
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOGS_DIR="$PROJECT_ROOT/logs"
+
+# Load .env file
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    set -a
+    source "$PROJECT_ROOT/.env"
+    set +a
+fi
+
+BACKEND_PORT=${BACKEND_PORT:-8000}
+FRONTEND_PORT=${FRONTEND_PORT:-3000}
 
 # Create logs directory if it doesn't exist
 mkdir -p "$LOGS_DIR"

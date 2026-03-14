@@ -7,8 +7,8 @@ const QuizLaunchButton = ({ topicId, lessonId, size = "sm" }) => {
   const handleClick = (e) => {
     e.stopPropagation();
     const params = new URLSearchParams();
-    if (topicId) params.append("topic_id", topicId);
-    if (lessonId) params.append("lesson_id", lessonId);
+    if (topicId) params.append("topicId", topicId);
+    if (lessonId) params.append("lessonId", lessonId);
     navigate(`/quiz?${params}`);
   };
 

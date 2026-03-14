@@ -13,9 +13,12 @@ from src.crud.crud_quiz_log import (
     get_quiz_log_by_id,
     get_quiz_stats,
 )
+from src.crud.crud_lesson import get_lesson_by_id
 from src.crud.crud_quiz_question import (
     create_quiz_questions,
     get_question_by_id,
+    get_question_count,
+    get_question_count_for_topic,
     get_total_question_count,
 )
 from src.database import get_db
@@ -32,7 +35,7 @@ from src.schemas.quiz import (
     TopicWithLessons,
 )
 from src.service.answer_service import grade_and_update
-from src.service.quiz_selector import select_quiz
+from src.service.quiz_selector import LOOP_SIZE_CAP, select_quiz
 from src.service.topic_lookup import (
     get_all_topic_ids,
     get_lesson_name,
@@ -50,9 +53,7 @@ def _get_user_or_401(request: Request, db: Session):
     """Authenticate user or raise 401."""
     user = authenticate_user_from_request(request, db)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     return user
 
 
@@ -82,6 +83,14 @@ async def get_next_quiz(
         quiz_type=question.quiz_type,
     )
 
+    lesson_q_count = get_question_count(db, question.lesson_id)
+    if lesson_id is not None:
+        loop_count = lesson_q_count
+    elif topic_id is not None:
+        loop_count = min(LOOP_SIZE_CAP, get_question_count_for_topic(db, topic_id))
+    else:
+        loop_count = min(LOOP_SIZE_CAP, get_total_question_count(db))
+
     return QuizNextResponse(
         quiz_id=quiz_log.id,
         question=question.question,
@@ -89,7 +98,10 @@ async def get_next_quiz(
         quiz_type=question.quiz_type,
         topic_id=question.topic_id,
         lesson_id=question.lesson_id,
+        lesson_title=get_lesson_name(question.lesson_id),
         correct_option_count=len(question.correct_options),
+        lesson_question_count=lesson_q_count,
+        loop_question_count=loop_count,
     )
 
 
@@ -105,9 +117,7 @@ async def answer_quiz(
 
     quiz_log = get_quiz_log_by_id(db, quiz_id)
     if not quiz_log or quiz_log.username != user.username:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
     if quiz_log.assessment_result is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Quiz already answered"
@@ -208,6 +218,15 @@ async def create_questions(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No questions provided"
         )
+
+    # Validate that all referenced lesson_ids exist in lessons table
+    lesson_ids = {q.lesson_id for q in questions}
+    for lid in lesson_ids:
+        if not get_lesson_by_id(db, lid):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Lesson {lid} not found. Create it first via POST /api/lessons.",
+            )
 
     dicts = [q.model_dump() for q in questions]
     count = create_quiz_questions(db, dicts)

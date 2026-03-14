@@ -46,12 +46,21 @@ def _login(client, db_session, username="testuser"):
 
 def _create_question(db, topic_id="t1", lesson_id=1):
     q = QuizQuestion(
-        topic_id=topic_id, lesson_id=lesson_id, lesson_filename="test.md",
-        quiz_type="recall", question="Q?", quiz_learnt="Learn",
-        option_a="A", option_b="B", option_c="C", option_d="D",
+        topic_id=topic_id,
+        lesson_id=lesson_id,
+        lesson_filename="test.md",
+        quiz_type="recall",
+        question="Q?",
+        quiz_learnt="Learn",
+        option_a="A",
+        option_b="B",
+        option_c="C",
+        option_d="D",
         correct_options=["B"],
-        response_to_user_option_a="eA", response_to_user_option_b="eB",
-        response_to_user_option_c="eC", response_to_user_option_d="eD",
+        response_to_user_option_a="eA",
+        response_to_user_option_b="eB",
+        response_to_user_option_c="eC",
+        response_to_user_option_d="eD",
         quiz_take_away="TK",
     )
     db.add(q)
@@ -106,6 +115,7 @@ class TestDashboardEndpoints:
             data = response.json()
             assert "topics" in data
             assert "global_recall" in data
+            assert "global_accuracy" in data
             assert "topics_at_risk" in data
             assert "lessons_at_risk" in data
         finally:

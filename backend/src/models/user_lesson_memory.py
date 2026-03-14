@@ -46,9 +46,9 @@ class UserLessonMemory(Base):
     def recall_probability(self, current_quiz_count: int) -> float:
         """Compute m(t) = exp(-n * quizzes_elapsed / QUIZ_DECAY_SCALE).
 
-        Returns 1.0 if never reviewed.
+        Returns 1.0 if never reviewed (record exists but no actual reviews).
         """
-        if self.last_review_quiz_count is None or self.last_review_quiz_count == 0:
+        if self.review_count == 0 or self.last_review_quiz_count is None:
             return 1.0
         quizzes_elapsed = max(0, current_quiz_count - self.last_review_quiz_count)
         return math.exp(-self.forgetting_rate * quizzes_elapsed / QUIZ_DECAY_SCALE)

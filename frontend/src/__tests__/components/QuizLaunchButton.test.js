@@ -14,7 +14,7 @@ describe("QuizLaunchButton", () => {
     mockNavigate.mockClear();
   });
 
-  it("navigates to /quiz with topic_id", () => {
+  it("navigates to /quiz with topicId", () => {
     render(
       <BrowserRouter>
         <QuizLaunchButton topicId="t1" />
@@ -22,10 +22,10 @@ describe("QuizLaunchButton", () => {
     );
 
     fireEvent.click(screen.getByText("Quiz"));
-    expect(mockNavigate).toHaveBeenCalledWith("/quiz?topic_id=t1");
+    expect(mockNavigate).toHaveBeenCalledWith("/quiz?topicId=t1");
   });
 
-  it("navigates to /quiz with lesson_id", () => {
+  it("navigates to /quiz with lessonId", () => {
     render(
       <BrowserRouter>
         <QuizLaunchButton topicId="t1" lessonId={2} />
@@ -33,8 +33,6 @@ describe("QuizLaunchButton", () => {
     );
 
     fireEvent.click(screen.getByText("Quiz"));
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/quiz?topic_id=t1&lesson_id=2",
-    );
+    expect(mockNavigate).toHaveBeenCalledWith("/quiz?topicId=t1&lessonId=2");
   });
 });
