@@ -18,14 +18,15 @@ Read a lesson file and generate quiz questions, then save them as a JSON file in
 2. Read the lesson file at the extracted path.
 3. Read the corresponding metadata file at `data/metadata/{lesson_base_name}.json` to get the better context.
 4. Read the quiz system prompt at `.claude/skills/lesson-quiz-generate/quiz_system_prompt.md`
-5. Generate exactly **N** quiz questions from the lesson content following the system prompt rules:
+5. Read the user's background at `.claude/skills/personal_background.md` — use it to craft **application** and **practical** quiz scenarios that relate to the user's real life (e.g. R&D startup work, Hong Kong context, family budgeting, blue-chip investing, career as a staff engineer with a PhD).
+6. Generate exactly **N** quiz questions from the lesson content following the system prompt rules:
    - Mix quiz types across: `recall`, `understanding`, `application`, `analysis`
    - Mix quiz scopes across: `section`, `cross-section`, `synthesis`, `analogy`, `practical`
    - Spread questions across both axes (type x scope) — see distribution table in system prompt
    - If the lesson has no Story section, skip `analogy` scope; if no case study, skip `practical`
    - Alternate between single-answer and multiple-answer questions
    - Test deep understanding, not surface-level recall
-6. Save all N questions as a JSON array to `data/quiz/{lesson_filename}.json` (where `{lesson_filename}` is the lesson file's name without extension, e.g. `sample_lesson_1.json`). Create the `data/quiz/` directory if it doesn't exist.
+7. Save all N questions as a JSON array to `data/quiz/{lesson_filename}.json` (where `{lesson_filename}` is the lesson file's name without extension, e.g. `sample_lesson_1.json`). Create the `data/quiz/` directory if it doesn't exist.
 
 ## Quiz Question Fields
 

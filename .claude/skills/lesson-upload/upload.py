@@ -4,11 +4,16 @@
 Usage:
     python upload.py <base_filename> [--project-root <path>]
 
-Example:
-    python upload.py 251215_stop_trusting_cloud_cameras_heres_what_i_use_inste
+Accepts either:
+    - bare filename:   250218_20_quantum_cheat_codes_that_i_wish_i_knew_in_my_2
+    - with channel:    themitmonk/250218_20_quantum_cheat_codes_that_i_wish_i_knew_in_my_2
+
+The script auto-discovers files across data/lesson/, data/metadata/, and data/quiz/
+by searching subdirectories if the file is not found at the top level.
 """
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -41,19 +46,49 @@ def load_env(project_root):
     return token, api_url
 
 
+def find_file(project_root, data_dir, filename):
+    """Find a file in data_dir, checking both flat and subdirectory layouts.
+
+    Search order:
+      1. data_dir/filename           (flat)
+      2. data_dir/*/filename          (one subdirectory deep)
+    """
+    flat = os.path.join(project_root, data_dir, filename)
+    if os.path.exists(flat):
+        return flat
+
+    pattern = os.path.join(project_root, data_dir, "*", filename)
+    matches = glob.glob(pattern)
+    if matches:
+        return matches[0]
+
+    return None
+
+
 def read_files(project_root, base_filename):
-    """Read lesson, metadata, and quiz files."""
-    lesson_path = os.path.join(project_root, "data/lesson", f"{base_filename}.md")
-    metadata_path = os.path.join(project_root, "data/metadata", f"{base_filename}.json")
-    quiz_path = os.path.join(project_root, "data/quiz", f"{base_filename}.json")
+    """Read lesson, metadata, and quiz files with auto-discovery."""
+    # Strip any leading channel prefix for the bare name
+    bare = os.path.basename(base_filename)
+
+    lesson_path = find_file(project_root, "data/lesson", f"{bare}.md")
+    metadata_path = find_file(project_root, "data/metadata", f"{bare}.json")
+    quiz_path = find_file(project_root, "data/quiz", f"{bare}.json")
+
+    # If not found with bare name, try the full base_filename (channel/name)
+    if not lesson_path:
+        lesson_path = find_file(project_root, "data/lesson", f"{base_filename}.md")
+    if not metadata_path:
+        metadata_path = find_file(project_root, "data/metadata", f"{base_filename}.json")
+    if not quiz_path:
+        quiz_path = find_file(project_root, "data/quiz", f"{base_filename}.json")
 
     missing = []
-    if not os.path.exists(lesson_path):
-        missing.append(f"data/lesson/{base_filename}.md")
-    if not os.path.exists(metadata_path):
-        missing.append(f"data/metadata/{base_filename}.json")
-    if not os.path.exists(quiz_path):
-        missing.append(f"data/quiz/{base_filename}.json")
+    if not lesson_path:
+        missing.append(f"data/lesson/**/{bare}.md")
+    if not metadata_path:
+        missing.append(f"data/metadata/**/{bare}.json")
+    if not quiz_path:
+        missing.append(f"data/quiz/**/{bare}.json")
 
     if missing:
         print("ERROR: Missing files:", ", ".join(missing))
@@ -66,6 +101,9 @@ def read_files(project_root, base_filename):
         metadata = json.load(f)
     with open(quiz_path) as f:
         questions = json.load(f)
+
+    # Store resolved paths for later reference
+    metadata["_lesson_path"] = lesson_path
 
     return lesson_content, metadata, questions
 
@@ -116,13 +154,13 @@ def upload_lesson(api_url, token, topic_id, topic_name, metadata, lesson_content
         sys.exit(1)
 
 
-def upload_questions(api_url, token, questions, base_filename, lesson_id, topic_id, topic_name, lesson_name):
+def upload_questions(api_url, token, questions, lesson_filename, lesson_id, topic_id, topic_name, lesson_name):
     """Upload quiz questions one at a time."""
     for q in questions:
         q.pop("lesson_title", None)
         q["topic_id"] = topic_id
         q["lesson_id"] = lesson_id
-        q["lesson_filename"] = f"{base_filename}.md"
+        q["lesson_filename"] = lesson_filename
         q["topic_name"] = topic_name
         q["lesson_name"] = lesson_name
 
@@ -166,23 +204,25 @@ def tick_to_learn(project_root, base_filename):
     if not os.path.exists(to_learn_path):
         return
 
-    search = f"data/lesson/{base_filename}.md"
+    bare = os.path.basename(base_filename)
 
     with open(to_learn_path) as f:
         content = f.read()
 
-    if search in content:
-        updated = content.replace(f"- [ ] ", "- [x] ", 0)  # naive, do line-level
-        lines = content.split("\n")
-        new_lines = []
-        for line in lines:
-            if search in line and line.strip().startswith("- [ ]"):
-                line = line.replace("- [ ]", "- [x]", 1)
-            new_lines.append(line)
+    # Match the bare filename anywhere in the line
+    if bare not in content:
+        return
 
-        with open(to_learn_path, "w") as f:
-            f.write("\n".join(new_lines))
-        print(f"Checked off in data/to_learn.md")
+    lines = content.split("\n")
+    new_lines = []
+    for line in lines:
+        if bare in line and line.strip().startswith("- [ ]"):
+            line = line.replace("- [ ]", "- [x]", 1)
+        new_lines.append(line)
+
+    with open(to_learn_path, "w") as f:
+        f.write("\n".join(new_lines))
+    print("Checked off in data/to_learn.md")
 
 
 def cleanup():
@@ -194,7 +234,7 @@ def cleanup():
 
 def main():
     parser = argparse.ArgumentParser(description="Upload lesson and quiz questions to API")
-    parser.add_argument("base_filename", help="Base filename without extension")
+    parser.add_argument("base_filename", help="Base filename without extension (e.g. '250218_my_lesson' or 'themitmonk/250218_my_lesson')")
     parser.add_argument("--project-root", default=os.getcwd(), help="Project root directory")
     args = parser.parse_args()
 
@@ -204,7 +244,7 @@ def main():
     # Step 0: Load token
     token, api_url = load_env(project_root)
 
-    # Step 1: Read files
+    # Step 1: Read files (auto-discovers across subdirectories)
     lesson_content, metadata, questions = read_files(project_root, base_filename)
 
     # Step 2: Resolve topic
@@ -215,9 +255,11 @@ def main():
 
     # Step 4 & 5: Prepare and upload quiz questions
     lesson_name = metadata["title"]
+    # Use the resolved lesson path's filename for the lesson_filename field
+    lesson_filename = os.path.basename(metadata.get("_lesson_path", f"{base_filename}.md"))
     print(f"Uploading {len(questions)} quiz questions...")
     success, total = upload_questions(
-        api_url, token, questions, base_filename, lesson_id, topic_id, topic_name, lesson_name
+        api_url, token, questions, lesson_filename, lesson_id, topic_id, topic_name, lesson_name
     )
 
     # Step 6: Tick to-learn

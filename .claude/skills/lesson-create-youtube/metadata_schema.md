@@ -1,8 +1,8 @@
 # Metadata JSON Schema
 
-Save the metadata to: `data/metadata/{yymmdd}_{slug}.json`
+Save the metadata to: `data/metadata/{channel_slug}/{yymmdd}_{slug}.json`
 
-See SKILL.md for the `{yymmdd}_{slug}` naming convention.
+See SKILL.md for the `{channel_slug}/{yymmdd}_{slug}` naming convention.
 
 ## JSON Structure
 
@@ -51,7 +51,7 @@ metadata = {
     "transcript": transcript
 }
 
-with open('data/metadata/{yymmdd}_{slug}.json', 'w') as f:
+with open('data/metadata/{channel_slug}/{yymmdd}_{slug}.json', 'w') as f:
     json.dump(metadata, f, indent=2, ensure_ascii=False)
 PYEOF
 ```
@@ -61,4 +61,4 @@ PYEOF
 - Use `ensure_ascii=False` so Unicode characters (e.g. curly quotes, em dashes) are preserved as-is
 - Use `indent=2` for readable JSON
 - Read the transcript from the temp file rather than trying to inline it — avoids shell escaping issues
-- Ensure `data/metadata/` directory exists before writing: `mkdir -p data/metadata`
+- Ensure the channel subdirectory exists before writing: `mkdir -p data/metadata/{channel_slug}`
