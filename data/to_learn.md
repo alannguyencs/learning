@@ -1,0 +1,79 @@
+# To Learn
+
+- [ ] Swimmer Ian Ho shares the health and wellness traits needed to succeed in the sports world (South China Morning Post) - data/lesson/260306_swimmer_ian_ho_shares_the_health_and_wellness.md
+- [ ] How do US-Israeli strikes on Iran impact oil and gas supplies? (South China Morning Post) - data/lesson/260303_how_do_us_israeli_strikes_on_iran_impact_oil.md
+- [ ] Trump says Iran operation to last up to 5 weeks (South China Morning Post) - data/lesson/260303_trump_says_iran_operation_to_last_up_to_5.md
+- [ ] Air strikes spread across Middle East (South China Morning Post) - data/lesson/260302_air_strikes_spread_across_middle_east.md
+- [ ] Iran's Supreme leader killed in US-Israeli strike (South China Morning Post) - data/lesson/260228_irans_supreme_leader_killed_in_us_israeli.md
+- [ ] What do we know about Kim's daughter and potential successor? (South China Morning Post) - data/lesson/260228_what_do_we_know_about_kims_daughter_and.md
+- [ ] US and Israel launch major strikes on Iran (South China Morning Post) - data/lesson/260228_us_and_israel_launch_major_strikes_on_iran.md
+- [ ] Fashion designer Shangguan Zhe of Sankuanz on breaking boundaries to achieve success (South China Morning Post) - data/lesson/260227_fashion_designer_shangguan_zhe_of_sankuanz.md
+- [ ] Claude Code Loops in 7 Minutes (Developers Digest) - data/lesson/260307_claude_code_loops_in_7_minutes.md
+- [ ] OpenAI's GPT 5.4 in 10 Minutes: 1M Context, Computer Use, Coding Gains, Benchmarks & Pricing (Developers Digest) - data/lesson/260305_openais_gpt_54_in_10_minutes_1m_context_computer_u.md
+- [ ] Claude Code: NEW Remote Control, Auto Memory, Plugins & More (Developers Digest) - data/lesson/260228_claude_code_new_remote_control_auto_memory_plugins.md
+- [ ] Mercury 2: The First Reasoning Diffusion Language Model (1,000+ tokens/sec) (Developers Digest) - data/lesson/260224_mercury_2_the_first_reasoning_diffusion_language_m.md
+- [ ] Claude Sonnet 4.6 in 7 Minutes (Developers Digest) - data/lesson/260218_claude_sonnet_46_in_7_minutes.md
+- [ ] Claude Opus 4.6 in 10 Minutes (Developers Digest) - data/lesson/260208_claude_opus_46_in_10_minutes.md
+- [ ] Why is Claude Code So Popular? (Developers Digest) - data/lesson/260119_why_is_claude_code_so_popular.md
+- [ ] Anthropic's Cowork: Claude Code for the Rest of Your Work (Developers Digest) - data/lesson/260113_anthropics_cowork_claude_code_for_the_rest_of_your.md
+- [ ] Progressive Disclosure in Claude Code (Developers Digest) - data/lesson/260112_progressive_disclosure_in_claude_code.md
+- [ ] The "I Could Build That" Illusion (Prompt Engineering) - data/lesson/260309_the_i_could_build_that_illusion.md
+- [ ] Claude Code 2.0: Massive Upgrade with Agent Loops (Prompt Engineering) - data/lesson/260308_claude_code_20_massive_upgrade_with_agent_loops.md
+- [ ] GPT-5.4: Everything You Need to Know (Prompt Engineering) - data/lesson/260305_gpt54_everything_you_need_to_know.md
+- [ ] A Sad Day for Open Source AI (Prompt Engineering) - data/lesson/260305_a_sad_day_for_open_source_ai.md
+- [ ] This 30-Year-Old Pattern Fixes AI Agents (Prompt Engineering) - data/lesson/260304_this_30yearold_pattern_fixes_ai_agents.md
+- [ ] Gemini 3.1 Flash-Lite: The Model You'll Actually Use... (Prompt Engineering) - data/lesson/260303_gemini_31_flashlite_the_model_youll_actually_use.md
+- [ ] The Problem Every AI Company Is Hiding (Prompt Engineering) - data/lesson/260228_the_problem_every_ai_company_is_hiding.md
+- [ ] Nano Banana 2 is Here - Faster and Cheaper (Prompt Engineering) - data/lesson/260226_nano_banana_2_is_here_faster_and_cheaper.md
+- [ ] Mercury 2: The First Diffusion Model That 'Thinks' (Prompt Engineering) - data/lesson/260224_mercury_2_the_first_diffusion_model_that_thinks.md
+- [ ] The AI Model Doesn't Matter Anymore (Prompt Engineering) - data/lesson/260223_the_ai_model_doesnt_matter_anymore.md
+- [ ] Claude Code Code Review, Deepseek v4, Gemma 4, OpenClaw Update, Copilot Cowork, & More! HUGE AI News (WorldofAI) - data/lesson/260309_claude_code_code_review_deepseek_v4_gemma_4_opencl.md
+- [ ] Superpowers: NEW Spec Toolkit Ends Vibe Coding\! 100x Better Than Vibe Coding (Full Tutorial) (WorldofAI) - data/lesson/260308_superpowers_new_spec_toolkit_ends_vibe_coding_100x.md
+- [ ] Claude Code Just Got ANOTHER MASSIVE Upgrade with /Loop - Automate AI Coding\! (WorldofAI) - data/lesson/260307_claude_code_just_got_another_massive_upgrade_with_.md
+- [ ] Claude Code + NotebookLM = GOD MODE\! Can Build and Automate EVERYTHING\! (WorldofAI) - data/lesson/260307_claude_code_notebooklm_god_mode_can_build_and_auto.md
+- [ ] Claude Code Just Got A MASSIVE Upgrade\! New Agent Skills, Ultra Think, Voice Mode, & More\! (WorldofAI) - data/lesson/260306_claude_code_just_got_a_massive_upgrade_new_agent_s.md
+- [ ] GPT-5.4 Is INSANE\! OpenAI's BEST Model Yet\! 1 Million Context & Excels at Coding\! (Fully Tested) (WorldofAI) - data/lesson/260304_gpt54_is_insane_openais_best_model_yet_1_million_c.md
+- [ ] Gemini 3.1 Flash-Lite Is Google's FASTEST & Cheapest Model Ever\! Decent At Coding\! (WorldofAI) - data/lesson/260304_gemini_31_flashlite_is_googles_fastest_cheapest_mo.md
+- [ ] Gemini Super Agents: Supercharge AI Agents To Do Anything\! (Opensource) (WorldofAI) - data/lesson/260302_gemini_super_agents_supercharge_ai_agents_to_do_an.md
+- [ ] NEW Claude Code & OpenCode KILLER\! This Just Fixed 90% of AI Coding\! (Open Source) (WorldofAI) - data/lesson/260301_new_claude_code_opencode_killer_this_just_fixed_90.md
+- [ ] Gemini Super Gems: Google's NEW AI Super Agent\! Goodbye N8N\! (FULLY FREE AI App Generator) - Opal (WorldofAI) - data/lesson/260228_gemini_super_gems_googles_new_ai_super_agent_goodb.md
+- [ ] The Future Of Brain-Computer Interfaces (Y Combinator) - data/lesson/260309_the_future_of_braincomputer_interfaces.md
+- [ ] Common Mistakes With Vibe Coded Websites (Y Combinator) - data/lesson/260306_common_mistakes_with_vibe_coded_websites.md
+- [ ] The Powerful Alternative To Fine-Tuning (Y Combinator) - data/lesson/260227_the_powerful_alternative_to_finetuning.md
+- [ ] The AI Agent Economy Is Here (Y Combinator) - data/lesson/260221_the_ai_agent_economy_is_here.md
+- [ ] Inside Claude Code With Its Creator Boris Cherny (Y Combinator) - data/lesson/260217_inside_claude_code_with_its_creator_boris_cherny.md
+- [ ] The New Way To Build A Startup (Y Combinator) - data/lesson/260214_the_new_way_to_build_a_startup.md
+- [ ] OpenClaw Creator: Why 80% Of Apps Will Disappear (Y Combinator) - data/lesson/260207_openclaw_creator_why_80_of_apps_will_disappear.md
+- [ ] We're All Addicted To Claude Code (Y Combinator) - data/lesson/260206_were_all_addicted_to_claude_code.md
+- [ ] How We Redesigned Our Website (Y Combinator) - data/lesson/260130_how_we_redesigned_our_website.md
+- [ ] Why Your Startup Website Isn't Converting (Y Combinator) - data/lesson/260129_why_your_startup_website_isnt_converting.md
+- [ ] Dylan Patel: They Don't See It Coming (Matthew Berman) - data/lesson/260309_dylan_patel_they_dont_see_it_coming.md
+- [ ] OpenAI just dropped GPT-5.4 and WOW.... (Matthew Berman) - data/lesson/260305_openai_just_dropped_gpt54_and_wow.md
+- [ ] They spent MILLIONS on this... (Matthew Berman) - data/lesson/260302_they_spent_millions_on_this.md
+- [ ] The Government just blacklisted Anthropic... (Matthew Berman) - data/lesson/260227_the_government_just_blacklisted_anthropic.md
+- [ ] They Got Caught... (Matthew Berman) - data/lesson/260225_they_got_caught.md
+- [ ] I've spent 5 BILLION tokens perfecting OpenClaw... (Matthew Berman) - data/lesson/260224_ive_spent_5_billion_tokens_perfecting_openclaw.md
+- [ ] Google just dropped Gemini 3.1... (WOAH) (Matthew Berman) - data/lesson/260220_google_just_dropped_gemini_31_woah.md
+- [ ] Anthropic just BANNED OpenClaw... (Matthew Berman) - data/lesson/260219_anthropic_just_banned_openclaw.md
+- [ ] Anthropic just dropped Sonnet 4.6... (Matthew Berman) - data/lesson/260217_anthropic_just_dropped_sonnet_46.md
+- [ ] 21 INSANE Use Cases For OpenClaw... (Matthew Berman) - data/lesson/260217_21_insane_use_cases_for_openclaw.md
+- [ ] The greatest unsolved problem in computer science... (Fireship) - data/lesson/260309_the_greatest_unsolved_problem_in_computer_science.md
+- [ ] Cloudflare just slop forked Next.js (Fireship) - data/lesson/260302_cloudflare_just_slop_forked_nextjs.md
+- [ ] When open-sourcing your code goes wrong... (Fireship) - data/lesson/260226_when_opensourcing_your_code_goes_wrong.md
+- [ ] TanStack Start in 100 Seconds (Fireship) - data/lesson/260220_tanstack_start_in_100_seconds.md
+- [ ] How AI is breaking the SaaS business model... (Fireship) - data/lesson/260217_how_ai_is_breaking_the_saas_business_model.md
+- [ ] 10 open source tools that feel illegal... (Fireship) - data/lesson/260205_10_open_source_tools_that_feel_illegal.md
+- [ ] The wild rise of OpenClaw... (Fireship) - data/lesson/260130_the_wild_rise_of_openclaw.md
+- [ ] Bun in 100 Seconds (Fireship) - data/lesson/260122_bun_in_100_seconds.md
+- [ ] A brief history of programming... (Fireship) - data/lesson/260120_a_brief_history_of_programming.md
+- [ ] .NET in 100 Seconds (Fireship) - data/lesson/260116_net_in_100_seconds.md
+- [ ] Claude Code on your Phone is OFFICIAL (it changes everything) (NetworkChuck) - data/lesson/260226_claude_code_on_your_phone_is_official_it_changes_e.md
+- [ ] become an AI HACKER (it's easier than you think) (NetworkChuck) - data/lesson/260220_become_an_ai_hacker_its_easier_than_you_think.md
+- [ ] I Tried running in 3D printed shoes (NetworkChuck) - data/lesson/260206_i_tried_running_in_3d_printed_shoes.md
+- [ ] Claude Code on your phone in 10 minutes (NetworkChuck) - data/lesson/260129_claude_code_on_your_phone_in_10_minutes.md
+- [ ] FREE Phone Calls with Claude Code (NetworkChuck) - data/lesson/260123_free_phone_calls_with_claude_code.md
+- [ ] Ethernet is DEAD?? Mac Studio is 100x FASTER!! (NetworkChuck) - data/lesson/251220_ethernet_is_dead_mac_studio_is_100x_faster.md
+- [  ] stop trusting cloud cameras!! (here's what I use instead) (NetworkChuck) - data/lesson/251215_stop_trusting_cloud_cameras_heres_what_i_use_inste.md
+- [  ] I'll never use n8n the same...... (NetworkChuck) - data/lesson/251210_ill_never_use_n8n_the_same.md
+- [  ] Hackers infected the wrong girlfriend.... (NetworkChuck) - data/lesson/251128_hackers_infected_the_wrong_girlfriend.md
+- [  ] You SUCK at Prompting AI (Here's the secret) (NetworkChuck) - data/lesson/251126_you_suck_at_prompting_ai_heres_the_secret.md
