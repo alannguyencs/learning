@@ -31,23 +31,27 @@ If no plan file is specified, check the recent conversation history for which pl
 
 For each item in the checklist from Step 1, verify whether it has been implemented:
 
-1. **Files exist**: Check that every file listed as "To Add New" exists using Glob.
-2. **Files modified**: Read every file listed as "To Update" and verify the described changes are present.
-3. **Files deleted**: Verify that files listed as "To Delete" no longer exist.
-4. **Database schema**: Read the migration SQL file(s) referenced in the plan. Verify all tables, columns, constraints, and indexes are present as specified.
-5. **Backend models**: Read the model file(s) and verify all fields match the schema.
-6. **Backend CRUD**: Read CRUD files and verify all functions described in the plan exist with the correct signatures and logic.
-7. **Backend services**: Read service files and verify all functions/classes described in the plan exist.
-8. **Backend API**: Read API route files and verify all endpoints described in the plan are registered with correct methods, paths, and handler logic.
-9. **API router registration**: Verify the new router is included in `backend/src/api/api_router.py` or `backend/src/api/__init__.py`.
-10. **Frontend pages**: Read page component files and verify they implement the UI described in the plan.
-11. **Frontend services**: Read service files and verify all API call methods exist.
-12. **Frontend routes**: Read `frontend_erp/src/routes.js` and verify new pages are registered.
-13. **Frontend navigation**: Read `frontend_erp/src/components/layout/navigationConfig.js` and verify new nav entries exist if mentioned in the plan.
-14. **Abstract docs**: Read `docs/abstract/` files listed in the plan's Documentation section and verify they are updated.
-15. **Technical docs**: Read `docs/technical/` files listed in the plan's Documentation section and verify they are updated.
-16. **Email gating / notifications**: If the plan mentions email functions or notification integration, verify those are implemented.
-17. **Key Workflow**: Verify the workflow described in the plan matches the actual code flow.
+1. Read `docs/design_patterns/index.md` to understand the expected pattern, which helps verify architectural consistency.
+2. **Files exist**: Check that every file listed as "To Add New" exists using Glob.
+3. **Files modified**: Read every file listed as "To Update" and verify the described changes are present.
+4. **Files deleted**: Verify that files listed as "To Delete" no longer exist.
+5. **Database schema**: Read the migration SQL file(s) referenced in the plan. Verify all tables, columns, constraints, and indexes are present as specified. Also verify the SQL follows migration file rules:
+   - **DDL only** — no DML (`INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`). DML is stripped by the migration runner and will NOT execute. Seed data belongs in `scripts/seed/`.
+   - **No semicolons in comments** — no `;` inside `--` comments. It breaks statement parsing.
+   - **Idempotent** — uses `IF NOT EXISTS`, `IF EXISTS`, `DO $$ BEGIN ... END $$` blocks.
+6. **Backend models**: Read the model file(s) and verify all fields match the schema.
+7. **Backend CRUD**: Read CRUD files and verify all functions described in the plan exist with the correct signatures and logic.
+8. **Backend services**: Read service files and verify all functions/classes described in the plan exist.
+9. **Backend API**: Read API route files and verify all endpoints described in the plan are registered with correct methods, paths, and handler logic.
+10. **API router registration**: Verify the new router is included in `backend/src/api/api_router.py` or `backend/src/api/__init__.py`.
+11. **Frontend pages**: Read page component files and verify they implement the UI described in the plan.
+12. **Frontend services**: Read service files and verify all API call methods exist.
+13. **Frontend routes**: Read `frontend_erp/src/routes.js` and verify new pages are registered.
+14. **Frontend navigation**: Read `frontend_erp/src/components/layout/navigationConfig.js` and verify new nav entries exist if mentioned in the plan.
+15. **Abstract docs**: Read `docs/abstract/` files listed in the plan's Documentation section and verify they are updated.
+16. **Technical docs**: Read `docs/technical/` files listed in the plan's Documentation section and verify they are updated.
+17. **Email gating / notifications**: If the plan mentions email functions or notification integration, verify those are implemented.
+18. **Key Workflow**: Verify the workflow described in the plan matches the actual code flow.
 
 ## Step 3: Report Findings
 
@@ -80,15 +84,16 @@ For each **Missing** or **Partial** item, implement it according to the plan spe
 4. **Loop**: After each implementation pass, go back to Step 2 and re-investigate. Continue until all items are **Done**.
 5. Maximum 3 loop iterations. If items remain after 3 passes, report them to the user with details on what's still missing and why.
 
-## Step 5: Run Pre-commit
+## Step 5: Run Pre-commit (Loop)
 
-Run pre-commit to catch linting and formatting errors:
+Run pre-commit in a loop until it passes cleanly:
 
-```bash
-source venv/bin/activate && pre-commit run --all-files
-```
+1. Run `source venv/bin/activate && pre-commit run --all-files`.
+2. Fix any issues (e.g., lint errors, unused imports, line count violations).
+3. Re-run pre-commit again — Prettier may reformat the fixes and push files back over the line limit (max 300 lines per frontend file). If so, fix again (e.g., extract components to separate files to reduce line count durably).
+4. Repeat until pre-commit passes cleanly on a full re-run with no new failures.
 
-Fix any issues reported. If fixes change files that were just verified, do a quick re-check to ensure the fixes didn't break the implementation.
+If fixes change files that were just verified, do a quick re-check to ensure the fixes didn't break the implementation.
 
 ## Step 6: Final Summary
 
